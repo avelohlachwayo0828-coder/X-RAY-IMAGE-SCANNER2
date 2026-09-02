@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+ml_venv/
+
+# Environment variables / secrets
+.env
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Results / generated files
+results/
+
+# Uploaded images
+uploads/
+
+# Model files
+*.keras
+*.h5
+*.hdf5
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploaded images
+uploads/
+
+# Dataset
+dataset/
+
+# Model files
+*.keras
+*.h5
+*.hdf5
