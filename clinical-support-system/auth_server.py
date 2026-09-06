@@ -59,10 +59,9 @@ from gradcam import (
 )
 
 
-from gemini_interpreter import (
+from ai_interpreter import (
     interpret_chest_xray
 )
-
 
 # =========================================================
 # APPLICATION

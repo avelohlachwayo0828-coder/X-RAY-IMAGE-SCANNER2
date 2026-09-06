@@ -1,0 +1,15 @@
+nohup: ignoring input
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Gemini client initialized with new SDK.
+ * Serving Flask app 'auth_server'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+ * Restarting with watchdog (inotify)
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+ * Debugger is active!
+ * Debugger PIN: 123-705-207
+127.0.0.1 - - [04/Sep/2026 10:45:01] "GET / HTTP/1.1" 302 -
+127.0.0.1 - - [04/Sep/2026 10:45:02] "GET /clinical-dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [04/Sep/2026 10:45:03] "GET /static/images/hospital-logo.jpg HTTP/1.1" 304 -

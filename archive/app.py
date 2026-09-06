@@ -1,11 +1,15 @@
 import streamlit as st
 from PIL import Image
+import sys
+sys.path.append('./clinical-support-system')   # <--- ADD THIS LINE
 
 from predict import predict_tb
 from scanner import analyze_xray
 from database import create_database, save_scan, get_scans
+
 # Create database table if it doesn't exist
 create_database()
+
 # -----------------------------
 # Page Settings
 # -----------------------------
@@ -22,7 +26,6 @@ st.markdown(
 Upload a chest X-ray and let the AI:
 
 ✅ Detect Tuberculosis
-
 ✅ Estimate confidence
 
 ✅ Generate a professional medical report
@@ -96,7 +99,7 @@ if uploaded_file is not None:
 
             # -----------------------------
             # Save to Database
-                        # -----------------------------
+            # -----------------------------
             save_scan(
                 uploaded_file.name,
                 report
@@ -116,6 +119,7 @@ scans = get_scans()
 if len(scans) == 0:
 
     st.info("No previous scans found.")
+
 
 else:
 
