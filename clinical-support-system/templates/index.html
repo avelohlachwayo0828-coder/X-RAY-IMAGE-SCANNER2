@@ -1,1202 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        AI-Based Clinical Support System
-    </title>
-
-<link
-    rel="icon"
-    type="image/jpeg"
-    href="{{ url_for('static', filename='images/hospital-logo.jpg') }}"
->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based Clinical Support System</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/hospital-logo.jpg') }}">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Hide Scrollbars */
+        html, body { scrollbar-width: none; -ms-overflow-style: none; }
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
-        /* =====================================================
-           RESET
-        ===================================================== */
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        html, body { width: 100%; height: 100%; }
+        body { 
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif; 
+            background: #eef4f6; 
+            color: #1d3038; 
+            min-height: 100dvh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: clamp(10px, 1.5vw, 24px); 
+            overflow: hidden; 
         }
 
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
+        .login-page { 
+            width: min(95vw, 1450px); 
+            height: min(92dvh, 760px); 
+            min-height: 500px; 
+            background: #ffffff; 
+            display: grid; 
+            grid-template-columns: 55% 45%; 
+            border-radius: clamp(14px, 1.5vw, 24px); 
+            overflow: hidden; 
+            box-shadow: 0 25px 60px rgba(23, 57, 68, 0.15); /* Softer, deeper shadow */
         }
 
-
-        body {
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #eef4f6;
-
-            color: #1d3038;
-
-            min-height: 100dvh;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            padding:
-                clamp(10px, 1.5vw, 24px);
-
-            overflow: hidden;
+        /* LEFT BRANDING */
+        .brand-section { 
+            background: linear-gradient(145deg, #f0f7f9 0%, #e2eff3 100%); 
+            padding: clamp(35px, 5vw, 75px); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .brand-section::after { 
+            content: ""; 
+            position: absolute; 
+            width: clamp(250px, 35vw, 550px); 
+            height: clamp(250px, 35vw, 550px); 
+            border-radius: 50%; 
+            border: 1px solid rgba(39, 103, 122, 0.08); 
+            right: clamp(-220px, -10vw, -100px); 
+            bottom: clamp(-220px, -12vw, -100px); 
+        }
+        .logo-area { 
+            width: clamp(150px, 15vw, 220px); 
+            height: clamp(85px, 10vw, 130px); 
+            margin-bottom: clamp(20px, 3vh, 35px); 
+            position: relative; 
+            z-index: 2; 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; 
+        }
+        .hospital-logo { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            object-position: left center; 
+            display: block; 
+        }
+        .brand-section h1 { 
+            position: relative; 
+            z-index: 2; 
+            font-size: clamp(32px, 3.5vw, 54px); 
+            line-height: 1.08; 
+            letter-spacing: -1.2px; 
+            color: #173e4c; 
+            max-width: 650px; 
+            margin-bottom: clamp(15px, 2.5vh, 25px); 
+        }
+        .brand-description { 
+            position: relative; 
+            z-index: 2; 
+            max-width: 590px; 
+            font-size: clamp(14px, 1.1vw, 18px); 
+            line-height: 1.65; 
+            color: #5a6d76; 
+        }
+        
+        /* Slogan */
+        .slogan { 
+            position: relative; 
+            z-index: 2; 
+            font-size: clamp(15px, 1.3vw, 20px); 
+            font-weight: 700; 
+            color: #2563eb; 
+            margin-top: 12px; 
+            letter-spacing: 0.5px; 
+            font-style: italic; 
+        }
+        
+        .system-tag { 
+            position: relative; 
+            z-index: 2; 
+            display: inline-flex; 
+            align-items: center; 
+            width: fit-content; 
+            margin-top: clamp(20px, 3vh, 32px); 
+            padding: 9px 16px; 
+            border-radius: 30px; 
+            background: rgba(37, 99, 235, 0.08); 
+            color: #2563eb; 
+            font-size: clamp(10px, 0.75vw, 12px); 
+            font-weight: 700; 
+            letter-spacing: 0.8px; 
+            text-transform: uppercase; 
         }
 
-
-        /* =====================================================
-           MAIN LOGIN CONTAINER
-        ===================================================== */
-
-        .login-page {
-
-            width: min(95vw, 1450px);
-
-            height: min(92dvh, 760px);
-
-            min-height: 500px;
-
-            background: #ffffff;
-
-            display: grid;
-
-            grid-template-columns: 55% 45%;
-
-            border-radius:
-                clamp(14px, 1.5vw, 24px);
-
-            overflow: hidden;
-
-            box-shadow:
-                0 18px 55px
-                rgba(23, 57, 68, 0.12);
+        /* RIGHT LOGIN FORM */
+        .form-section { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: clamp(30px, 5vw, 75px); 
+            background: #ffffff; 
+        }
+        .login-box { width: min(100%, 420px); }
+        .login-heading { margin-bottom: clamp(20px, 3vh, 30px); }
+        .login-heading h2 { 
+            font-size: clamp(26px, 2.5vw, 36px); 
+            color: #1b3139; 
+            line-height: 1.15; 
+            margin-bottom: 8px; 
+        }
+        .login-heading p { 
+            font-size: clamp(12px, 0.9vw, 14px); 
+            line-height: 1.5; 
+            color: #7a8990; 
         }
 
-
-        /* =====================================================
-           LEFT SIDE
-        ===================================================== */
-
-        .brand-section {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #e7f3f6 0%,
-                    #f4f8f9 100%
-                );
-
-            padding:
-                clamp(35px, 5vw, 75px);
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-            position: relative;
-
-            overflow: hidden;
+        .form-group { margin-bottom: clamp(15px, 2.2vh, 21px); }
+        .form-label { 
+            display: block; 
+            margin-bottom: 7px; 
+            font-size: clamp(11px, 0.8vw, 13px); 
+            font-weight: 700; 
+            color: #344a53; 
+        }
+        .input-wrapper { position: relative; width: 100%; }
+        .input-icon { 
+            position: absolute; 
+            left: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 19px; 
+            height: 19px; 
+            color: #82959d; 
+            pointer-events: none; 
+        }
+        .input-field { 
+            width: 100%; 
+            height: clamp(46px, 6vh, 54px); 
+            border: 1px solid #d7e0e4; 
+            border-radius: 9px; 
+            background: #ffffff; 
+            color: #263b43; 
+            padding: 0 45px; 
+            font-size: clamp(12px, 0.9vw, 14px); 
+            outline: none; 
+            transition: border-color 0.2s ease, box-shadow 0.2s ease; 
+        }
+        .input-field::placeholder { color: #a1adb2; }
+        .input-field:focus { 
+            border-color: #39758a; 
+            box-shadow: 0 0 0 3px rgba(57, 117, 138, 0.10); 
         }
 
+        .password-toggle { 
+            position: absolute; 
+            right: 13px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            border: none; 
+            background: transparent; 
+            color: #81939a; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4px; 
+        }
+        .password-toggle svg { width: 19px; height: 19px; }
 
-        /* Decorative circle */
+        .login-button { 
+            width: 100%; 
+            height: clamp(46px, 6vh, 54px); 
+            margin-top: 4px; 
+            border: none; 
+            border-radius: 9px; 
+            background: #27677a; 
+            color: white; 
+            font-size: clamp(12px, 0.9vw, 14px); 
+            font-weight: 700; 
+            letter-spacing: 0.3px; 
+            cursor: pointer; 
+            transition: background 0.2s ease, transform 0.1s ease; 
+        }
+        .login-button:hover { background: #1f5869; }
+        .login-button:active { transform: scale(0.99); }
 
-        .brand-section::after {
-
-            content: "";
-
-            position: absolute;
-
-            width:
-                clamp(250px, 35vw, 550px);
-
-            height:
-                clamp(250px, 35vw, 550px);
-
-            border-radius: 50%;
-
-            border:
-                1px solid
-                rgba(39, 103, 122, 0.07);
-
-            right:
-                clamp(-220px, -10vw, -100px);
-
-            bottom:
-                clamp(-220px, -12vw, -100px);
+        .error-message { 
+            margin-top: 12px; 
+            padding: 10px 12px; 
+            border-radius: 7px; 
+            background: #fff1f1; 
+            border: 1px solid #f2cccc; 
+            color: #a82a2a; 
+            font-size: 11px; 
+            line-height: 1.4; 
+            text-align: center; 
+        }
+        .admin-message { 
+            margin-top: clamp(18px, 2.5vh, 25px); 
+            padding-top: clamp(14px, 2vh, 19px); 
+            border-top: 1px solid #e7ecee; 
+            text-align: center; 
+            color: #7b898f; 
+            font-size: clamp(10px, 0.72vw, 12px); 
+            line-height: 1.55; 
+        }
+        .admin-message strong { color: #4c6068; }
+        .footer { 
+            margin-top: clamp(12px, 2vh, 18px); 
+            text-align: center; 
+            color: #a0abb0; 
+            font-size: clamp(8px, 0.62vw, 10px); 
         }
 
+        /* NO GLOBAL FOOTER HERE */
 
-        /* =====================================================
-           LOGO
-        ===================================================== */
-
-        .logo-area {
-
-            width:
-                clamp(150px, 15vw, 220px);
-
-            height:
-                clamp(85px, 10vw, 130px);
-
-            margin-bottom:
-                clamp(20px, 3vh, 35px);
-
-            position: relative;
-
-            z-index: 2;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: flex-start;
-
-            background: transparent;
+        @media (min-width: 901px) and (max-height: 700px) {
+            .login-page { height: 96dvh; min-height: 450px; }
+            .brand-section { padding: 25px 5vw; }
+            .form-section { padding: 25px 5vw; }
+            .logo-area { width: 150px; height: 75px; margin-bottom: 15px; }
+            .brand-section h1 { font-size: 31px; margin-bottom: 11px; }
+            .brand-description { font-size: 12px; line-height: 1.45; }
+            .system-tag { margin-top: 15px; }
+            .login-heading { margin-bottom: 17px; }
+            .login-heading h2 { font-size: 26px; }
+            .form-group { margin-bottom: 12px; }
+            .admin-message { margin-top: 14px; padding-top: 12px; }
         }
-
-
-        .hospital-logo {
-
-            width: 100%;
-
-            height: 100%;
-
-            object-fit: contain;
-
-            object-position: left center;
-
-            display: block;
-
-            background: transparent;
-
-            border: none;
-
-            outline: none;
-        }
-
-
-        /* =====================================================
-           BRAND TITLE
-        ===================================================== */
-
-        .brand-section h1 {
-
-            position: relative;
-
-            z-index: 2;
-
-            font-size:
-                clamp(30px, 3.4vw, 52px);
-
-            line-height: 1.08;
-
-            letter-spacing: -1.2px;
-
-            color: #173e4c;
-
-            max-width: 650px;
-
-            margin-bottom:
-                clamp(15px, 2.5vh, 25px);
-        }
-
-
-        .brand-description {
-
-            position: relative;
-
-            z-index: 2;
-
-            max-width: 590px;
-
-            font-size:
-                clamp(13px, 1.05vw, 17px);
-
-            line-height: 1.65;
-
-            color: #61737b;
-        }
-
-
-        .system-tag {
-
-            position: relative;
-
-            z-index: 2;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            width: fit-content;
-
-            margin-top:
-                clamp(20px, 3vh, 32px);
-
-            padding:
-                8px 13px;
-
-            border-radius: 30px;
-
-            background:
-                rgba(39, 103, 122, 0.08);
-
-            color: #27677a;
-
-            font-size:
-                clamp(9px, 0.72vw, 12px);
-
-            font-weight: 700;
-
-            letter-spacing: 0.8px;
-
-            text-transform: uppercase;
-        }
-
-
-        /* =====================================================
-           RIGHT LOGIN SECTION
-        ===================================================== */
-
-        .form-section {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            padding:
-                clamp(30px, 5vw, 75px);
-
-            background: #ffffff;
-        }
-
-
-        .login-box {
-
-            width: min(100%, 420px);
-        }
-
-
-        /* =====================================================
-           LOGIN HEADING
-        ===================================================== */
-
-        .login-heading {
-
-            margin-bottom:
-                clamp(20px, 3vh, 30px);
-        }
-
-
-        .login-heading h2 {
-
-            font-size:
-                clamp(26px, 2.5vw, 36px);
-
-            color: #1b3139;
-
-            line-height: 1.15;
-
-            margin-bottom: 8px;
-        }
-
-
-        .login-heading p {
-
-            font-size:
-                clamp(12px, 0.9vw, 14px);
-
-            line-height: 1.5;
-
-            color: #7a8990;
-        }
-
-
-        /* =====================================================
-           FORM
-        ===================================================== */
-
-        .form-group {
-
-            margin-bottom:
-                clamp(15px, 2.2vh, 21px);
-        }
-
-
-        .form-label {
-
-            display: block;
-
-            margin-bottom: 7px;
-
-            font-size:
-                clamp(11px, 0.8vw, 13px);
-
-            font-weight: 700;
-
-            color: #344a53;
-        }
-
-
-        .input-wrapper {
-
-            position: relative;
-
-            width: 100%;
-        }
-
-
-        /* =====================================================
-           INPUT ICON
-        ===================================================== */
-
-        .input-icon {
-
-            position: absolute;
-
-            left: 15px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            width: 19px;
-
-            height: 19px;
-
-            color: #82959d;
-
-            pointer-events: none;
-        }
-
-
-        /* =====================================================
-           INPUT
-        ===================================================== */
-
-        .input-field {
-
-            width: 100%;
-
-            height:
-                clamp(46px, 6vh, 54px);
-
-            border:
-                1px solid #d7e0e4;
-
-            border-radius: 9px;
-
-            background: #ffffff;
-
-            color: #263b43;
-
-            padding:
-                0 45px;
-
-            font-size:
-                clamp(12px, 0.9vw, 14px);
-
-            outline: none;
-
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease;
-        }
-
-
-        .input-field::placeholder {
-
-            color: #a1adb2;
-        }
-
-
-        .input-field:focus {
-
-            border-color: #39758a;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(57, 117, 138, 0.10);
-        }
-
-
-        /* =====================================================
-           PASSWORD TOGGLE
-        ===================================================== */
-
-        .password-toggle {
-
-            position: absolute;
-
-            right: 13px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            border: none;
-
-            background: transparent;
-
-            color: #81939a;
-
-            cursor: pointer;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            padding: 4px;
-        }
-
-
-        .password-toggle svg {
-
-            width: 19px;
-
-            height: 19px;
-        }
-
-
-        /* =====================================================
-           LOGIN BUTTON
-        ===================================================== */
-
-        .login-button {
-
-            width: 100%;
-
-            height:
-                clamp(46px, 6vh, 54px);
-
-            margin-top: 4px;
-
-            border: none;
-
-            border-radius: 9px;
-
-            background: #27677a;
-
-            color: white;
-
-            font-size:
-                clamp(12px, 0.9vw, 14px);
-
-            font-weight: 700;
-
-            letter-spacing: 0.3px;
-
-            cursor: pointer;
-
-            transition:
-                background 0.2s ease,
-                transform 0.1s ease;
-        }
-
-
-        .login-button:hover {
-
-            background: #1f5869;
-        }
-
-
-        .login-button:active {
-
-            transform: scale(0.99);
-        }
-
-
-        /* =====================================================
-           ERROR
-        ===================================================== */
-
-        .error-message {
-
-            margin-top: 12px;
-
-            padding: 10px 12px;
-
-            border-radius: 7px;
-
-            background: #fff1f1;
-
-            border:
-                1px solid #f2cccc;
-
-            color: #a82a2a;
-
-            font-size: 11px;
-
-            line-height: 1.4;
-
-            text-align: center;
-        }
-
-
-        /* =====================================================
-           ADMINISTRATOR MESSAGE
-        ===================================================== */
-
-        .admin-message {
-
-            margin-top:
-                clamp(18px, 2.5vh, 25px);
-
-            padding-top:
-                clamp(14px, 2vh, 19px);
-
-            border-top:
-                1px solid #e7ecee;
-
-            text-align: center;
-
-            color: #7b898f;
-
-            font-size:
-                clamp(10px, 0.72vw, 12px);
-
-            line-height: 1.55;
-        }
-
-
-        .admin-message strong {
-
-            color: #4c6068;
-        }
-
-
-        /* =====================================================
-           FOOTER
-        ===================================================== */
-
-        .footer {
-
-            margin-top:
-                clamp(12px, 2vh, 18px);
-
-            text-align: center;
-
-            color: #a0abb0;
-
-            font-size:
-                clamp(8px, 0.62vw, 10px);
-        }
-
-
-        /* =====================================================
-           SHORT LAPTOP SCREENS
-        ===================================================== */
-
-        @media
-        (min-width: 901px)
-        and (max-height: 700px) {
-
-            .login-page {
-
-                height: 96dvh;
-
-                min-height: 450px;
-            }
-
-
-            .brand-section {
-
-                padding:
-                    25px 5vw;
-            }
-
-
-            .form-section {
-
-                padding:
-                    25px 5vw;
-            }
-
-
-            .logo-area {
-
-                width: 150px;
-
-                height: 75px;
-
-                margin-bottom: 15px;
-            }
-
-
-            .brand-section h1 {
-
-                font-size: 31px;
-
-                margin-bottom: 11px;
-            }
-
-
-            .brand-description {
-
-                font-size: 12px;
-
-                line-height: 1.45;
-            }
-
-
-            .system-tag {
-
-                margin-top: 15px;
-            }
-
-
-            .login-heading {
-
-                margin-bottom: 17px;
-            }
-
-
-            .login-heading h2 {
-
-                font-size: 26px;
-            }
-
-
-            .form-group {
-
-                margin-bottom: 12px;
-            }
-
-
-            .admin-message {
-
-                margin-top: 14px;
-
-                padding-top: 12px;
-            }
-        }
-
-
-        /* =====================================================
-           TABLET
-        ===================================================== */
 
         @media (max-width: 900px) {
-
-            body {
-
-                overflow-y: auto;
-
-                padding: 20px;
-            }
-
-
-            .login-page {
-
-                width: 100%;
-
-                height: auto;
-
-                min-height: auto;
-
-                grid-template-columns: 1fr;
-            }
-
-
-            .brand-section {
-
-                padding:
-                    45px 8vw;
-            }
-
-
-            .form-section {
-
-                padding:
-                    45px 8vw;
-            }
+            body { overflow-y: auto; padding: 20px; }
+            .login-page { width: 100%; height: auto; min-height: auto; grid-template-columns: 1fr; }
+            .brand-section { padding: 45px 8vw; }
+            .form-section { padding: 45px 8vw; }
         }
-
-
-        /* =====================================================
-           MOBILE
-        ===================================================== */
 
         @media (max-width: 600px) {
-
-            body {
-
-                padding: 0;
-            }
-
-
-            .login-page {
-
-                min-height: 100dvh;
-
-                border-radius: 0;
-
-                box-shadow: none;
-            }
-
-
-            .brand-section {
-
-                padding:
-                    35px 25px;
-            }
-
-
-            .form-section {
-
-                padding:
-                    35px 25px;
-            }
-
-
-            .brand-section h1 {
-
-                font-size: 29px;
-            }
+            body { padding: 0; }
+            .login-page { min-height: 100dvh; border-radius: 0; box-shadow: none; }
+            .brand-section { padding: 35px 25px; }
+            .form-section { padding: 35px 25px; }
+            .brand-section h1 { font-size: 29px; }
         }
-
     </style>
-
 </head>
-
-
 <body>
-
-
-    <!-- =====================================================
-         MAIN PAGE
-    ===================================================== -->
-
     <main class="login-page">
-
-
-        <!-- =================================================
-             LEFT BRANDING
-        ================================================== -->
-
         <section class="brand-section">
-
-
-            <!-- =================================================
-                 HOSPITAL LOGO
-
-                 Your file is:
-
-                 hospital-logo.jpg.JPG
-
-                 If you renamed it to hospital-logo.jpg,
-                 use the version below.
-
-            ================================================== -->
-
             <div class="logo-area">
-
-                <img
-                    src="{{ url_for(
-                        'static',
-                        filename='images/hospital-logo.jpg'
-                    ) }}"
-                    class="hospital-logo"
-                    alt="Hospital Logo"
-                >
-
+                <img src="{{ url_for('static', filename='images/hospital-logo.jpg') }}" class="hospital-logo" alt="Hospital Logo">
             </div>
-
-
-            <!-- =================================================
-                 SYSTEM TITLE
-            ================================================== -->
-
-            <h1>
-
-                AI-Based Clinical
-                Support System
-
-            </h1>
-
-
-            <p class="brand-description">
-
-                A secure clinical decision-support
-                platform designed to assist
-                healthcare professionals with
-                chest X-ray analysis and respiratory
-                disease detection.
-
-            </p>
-
-
-            <div class="system-tag">
-
-                Clinical Decision Support
-
-            </div>
-
-
+            <h1>AI-Based Clinical Support System</h1>
+            <p class="brand-description">A secure clinical decision-support platform designed to assist healthcare professionals with chest X-ray analysis and respiratory disease detection.</p>
+            <div class="slogan">To Assist, Not to Replace.</div>
+            <div class="system-tag">Clinical Decision Support</div>
         </section>
-
-
-        <!-- =================================================
-             LOGIN
-        ================================================== -->
 
         <section class="form-section">
-
-
             <div class="login-box">
-
-
                 <div class="login-heading">
-
-                    <h2>
-
-                        Staff Login
-
-                    </h2>
-
-
-                    <p>
-
-                        Enter your hospital credentials
-                        to access the system.
-
-                    </p>
-
+                    <h2>Staff Login</h2>
+                    <p>Enter your hospital credentials to access the system.</p>
                 </div>
-
-
-                <!-- =================================================
-                     LOGIN FORM
-                ================================================== -->
-
-                <form
-                    action="{{ url_for('login') }}"
-                    method="POST"
-                >
-
-
-                    <!-- STAFF ID -->
-
+                <form action="{{ url_for('login') }}" method="POST">
                     <div class="form-group">
-
-
-                        <label
-                            class="form-label"
-                            for="staff_id"
-                        >
-
-                            Staff ID
-
-                        </label>
-
-
+                        <label class="form-label" for="staff_id">Staff ID</label>
                         <div class="input-wrapper">
-
-
-                            <!-- PERSON ICON -->
-
-                            <svg
-                                class="input-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-
-                                <circle
-                                    cx="12"
-                                    cy="7"
-                                    r="4"
-                                >
-                                </circle>
-
-
-                                <path
-                                    d="M5.5 21a6.5 6.5 0 0 1 13 0"
-                                >
-                                </path>
-
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <path d="M5.5 21a6.5 6.5 0 0 1 13 0"></path>
                             </svg>
-
-
-                            <input
-                                type="text"
-                                id="staff_id"
-                                name="staff_id"
-                                class="input-field"
-                                placeholder="Enter Staff ID"
-                                autocomplete="username"
-                                required
-                            >
-
+                            <input type="text" id="staff_id" name="staff_id" class="input-field" placeholder="Enter Staff ID" autocomplete="username" required>
                         </div>
-
                     </div>
-
-
-                    <!-- PASSWORD -->
-
                     <div class="form-group">
-
-
-                        <label
-                            class="form-label"
-                            for="password"
-                        >
-
-                            Password
-
-                        </label>
-
-
+                        <label class="form-label" for="password">Password</label>
                         <div class="input-wrapper">
-
-
-                            <!-- LOCK ICON -->
-
-                            <svg
-                                class="input-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-
-                                <rect
-                                    x="4"
-                                    y="10"
-                                    width="16"
-                                    height="11"
-                                    rx="2"
-                                >
-                                </rect>
-
-
-                                <path
-                                    d="M8 10V7a4 4 0 0 1 8 0v3"
-                                >
-                                </path>
-
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
                             </svg>
-
-
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="input-field"
-                                placeholder="Enter Password"
-                                autocomplete="current-password"
-                                required
-                            >
-
-
-                            <!-- EYE BUTTON -->
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                onclick="togglePassword()"
-                                aria-label="Show or hide password"
-                            >
-
-                                <svg
-                                    id="eyeIcon"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                >
-
-                                    <path
-                                        d="M2 12s3.5-7 10-7
-                                        10 7 10 7-3.5 7-10 7
-                                        -10-7-10-7z"
-                                    >
-                                    </path>
-
-
-                                    <circle
-                                        cx="12"
-                                        cy="12"
-                                        r="3"
-                                    >
-                                    </circle>
-
+                            <input type="password" id="password" name="password" class="input-field" placeholder="Enter Password" autocomplete="current-password" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Show or hide password">
+                                <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7 -10-7-10-7z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
-
                             </button>
-
-
                         </div>
-
                     </div>
-
-
-                    <!-- LOGIN BUTTON -->
-
-                    <button
-                        type="submit"
-                        class="login-button"
-                    >
-
-                        LOGIN
-
-                    </button>
-
-
+                    <button type="submit" class="login-button">LOGIN</button>
                 </form>
-
-
-                <!-- LOGIN ERROR -->
-
                 {% if error %}
-
-                    <div class="error-message">
-
-                        {{ error }}
-
-                    </div>
-
+                    <div class="error-message">{{ error }}</div>
                 {% endif %}
-
-
-                <!-- PASSWORD ASSISTANCE -->
-
-                <div class="admin-message">
-
-                    For password assistance,
-                    <strong>
-                        contact your system administrator.
-                    </strong>
-
-                </div>
-
-
-                <!-- FOOTER -->
-
-                <div class="footer">
-
-                    Authorized hospital personnel only.
-
-                </div>
-
-
+                <div class="admin-message">For password assistance, <strong>contact your system administrator.</strong></div>
+                <div class="footer">Authorized hospital personnel only.</div>
             </div>
-
         </section>
-
-
     </main>
 
-
-    <!-- =====================================================
-         PASSWORD VISIBILITY
-    ===================================================== -->
-
     <script>
-
         function togglePassword() {
-
-            const password =
-                document.getElementById("password");
-
-            const eyeIcon =
-                document.getElementById("eyeIcon");
-
-
-            if (
-                password.type === "password"
-            ) {
-
+            const password = document.getElementById("password");
+            const eyeIcon = document.getElementById("eyeIcon");
+            if (password.type === "password") {
                 password.type = "text";
-
-
-                eyeIcon.innerHTML = `
-
-                    <path d="M3 3l18 18"></path>
-
-                    <path
-                        d="M10.6 10.6
-                        a2 2 0 0 0 2.8 2.8">
-                    </path>
-
-                    <path
-                        d="M9.9 5.1
-                        A10.8 10.8 0 0 1 12 5
-                        c6.5 0 10 7 10 7
-                        a17.5 17.5 0 0 1-3.1 3.9">
-                    </path>
-
-                    <path
-                        d="M6.6 6.6
-                        C3.8 8.5 2 12 2 12
-                        s3.5 7 10 7
-                        a10.9 10.9 0 0 0 4.2-.8">
-                    </path>
-
-                `;
-
-            }
-
-            else {
-
+                eyeIcon.innerHTML = `<path d="M3 3l18 18"></path><path d="M10.6 10.6 a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 5.1 A10.8 10.8 0 0 1 12 5 c6.5 0 10 7 10 7 a17.5 17.5 0 0 1-3.1 3.9"></path><path d="M6.6 6.6 C3.8 8.5 2 12 2 12 s3.5 7 10 7 a10.9 10.9 0 0 0 4.2-.8"></path>`;
+            } else {
                 password.type = "password";
-
-
-                eyeIcon.innerHTML = `
-
-                    <path
-                        d="M2 12s3.5-7 10-7
-                        10 7 10 7-3.5 7-10 7
-                        -10-7-10-7z">
-                    </path>
-
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="3">
-                    </circle>
-
-                `;
-
+                eyeIcon.innerHTML = `<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7 -10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle>`;
             }
-
         }
-
     </script>
-
-
 </body>
-
 </html>

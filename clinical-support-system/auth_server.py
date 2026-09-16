@@ -77,6 +77,20 @@ app.secret_key = (
 
 
 # =========================================================
+# LOW CONFIDENCE THRESHOLD
+#
+# Predictions below this value are flagged for review
+# and are made available to every template.
+# =========================================================
+
+LOW_CONFIDENCE_THRESHOLD = 90
+
+app.jinja_env.globals[
+    "LOW_CONFIDENCE_THRESHOLD"
+] = LOW_CONFIDENCE_THRESHOLD
+
+
+# =========================================================
 # BASE DIRECTORY
 # =========================================================
 
@@ -152,6 +166,85 @@ def allowed_file(filename):
         in ALLOWED_EXTENSIONS
 
     )
+
+
+# =========================================================
+# BUILD REPORT DATA
+#
+# Groups analysed cases by predicted diagnosis and
+# collects any case whose confidence fell below the
+# review threshold, for the Reports page.
+# =========================================================
+
+def build_report_data(cases):
+
+    diagnosis_counts = {}
+
+    low_confidence_cases = []
+
+    analysed_count = 0
+
+    confidence_total = 0.0
+
+    for case in cases:
+
+        if (
+            case["status"] == "analysed"
+            and case["prediction"]
+        ):
+
+            diagnosis_counts[
+                case["prediction"]
+            ] = (
+                diagnosis_counts.get(
+                    case["prediction"],
+                    0
+                )
+                + 1
+            )
+
+            analysed_count += 1
+
+            if case["confidence"] is not None:
+
+                confidence_total += (
+                    case["confidence"]
+                )
+
+                if (
+                    case["confidence"]
+                    < LOW_CONFIDENCE_THRESHOLD
+                ):
+
+                    low_confidence_cases.append(
+                        case
+                    )
+
+    average_confidence = (
+
+        confidence_total / analysed_count
+
+        if analysed_count
+
+        else 0
+
+    )
+
+    return {
+
+        "diagnosis_counts":
+            diagnosis_counts,
+
+        "low_confidence_cases":
+            low_confidence_cases,
+
+        "low_confidence_count":
+            len(low_confidence_cases),
+
+        "average_confidence":
+            average_confidence
+
+    }
 
 
 # =========================================================
@@ -313,6 +406,10 @@ def clinical_dashboard():
 
     statistics = get_case_statistics()
 
+    report_data = build_report_data(
+        cases
+    )
+
     return render_template(
 
         "clinical_dashboard.html",
@@ -327,7 +424,9 @@ def clinical_dashboard():
 
         cases=cases,
 
-        statistics=statistics
+        statistics=statistics,
+
+        report_data=report_data
 
     )
 

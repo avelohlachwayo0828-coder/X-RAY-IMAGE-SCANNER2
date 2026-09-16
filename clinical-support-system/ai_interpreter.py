@@ -1,5 +1,6 @@
 import os
 import io
+import re
 import base64
 import concurrent.futures
 
@@ -37,6 +38,8 @@ understand a chest X-ray image in simple language.
 Describe visible image features only.
 Do NOT provide a diagnosis.
 Do NOT mention AI, models, or technical terms.
+Do NOT include any reasoning, thinking, or planning text.
+Respond with ONLY the final answer, starting directly with "IMAGE EXPLANATION".
 
 Use this format:
 
@@ -53,9 +56,24 @@ IMPORTANT
 (that a professional must review the image)
 """.strip()
 
+def strip_thinking(text):
+    # Remove <think>...</think> reasoning blocks some models include
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    # Handle an unclosed <think> tag (model cut off before closing it)
+    text = re.sub(r"<think>.*", "", text, flags=re.DOTALL | re.IGNORECASE)
+    return text.strip()
+
 def clean_response(text):
     if not text:
+        print("Groq returned empty text.")
         return SAFE_FALLBACK
+
+    text = strip_thinking(text)
+
+    if not text:
+        print("Response was empty after stripping <think> block (model likely ran out of tokens while reasoning).")
+        return SAFE_FALLBACK
+
     forbidden = ["classifier", "confidence score", "probability score", "as an ai model", "i am an ai"]
     lowered = text.lower()
     if any(phrase in lowered for phrase in forbidden):
@@ -91,7 +109,7 @@ def interpret_chest_xray(image):
                     }
                 ],
                 temperature=0.5,
-                max_tokens=800,
+                max_tokens=2000,
             )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
