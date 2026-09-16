@@ -73,3 +73,5 @@ clinical-support-system/static/ai_results/
 
 .DS_Store
 Thumbs.db
+# VS Code workspace files
+*.code-workspace
