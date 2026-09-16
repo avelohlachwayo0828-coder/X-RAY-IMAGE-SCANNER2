@@ -17,9 +17,7 @@ GEMINI_MODEL = "gemini-3.6-flash"
 
 def get_gemini_client():
 
-    api_key = os.environ.get(
-        "GEMINI_API_KEY"
-    )
+    api_key = os.environ.get("GEMINI_API_KEY")
 
     if not api_key:
         return None
