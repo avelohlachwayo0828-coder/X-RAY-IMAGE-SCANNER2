@@ -1,1066 +1,152 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Technician Dashboard
-    </title>
-
-<link
-    rel="icon"
-    type="image/jpeg"
-    href="{{ url_for('static', filename='images/hospital-logo.png') }}"
->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technician Dashboard</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/hospital-logo.jpg') }}">
     <style>
-
-        * {
-
-            box-sizing: border-box;
-
-            margin: 0;
-
-            padding: 0;
-
-        }
-
-
-        body {
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #eef4f6;
-
-            color: #20353d;
-
-            min-height: 100vh;
-
-            padding: 25px;
-
-        }
-
-
-        .dashboard {
-
-            width: min(
-                1400px,
-                96%
-            );
-
-            margin: auto;
-
-        }
-
-
-        /* =================================================
-           HEADER
-        ================================================= */
-
-        .header {
-
-            background: white;
-
-            padding: 22px 28px;
-
-            border-radius: 14px;
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-bottom: 22px;
-
-            box-shadow:
-                0 8px 25px
-                rgba(23, 57, 68, 0.08);
-
-        }
-
-
-        .header h1 {
-
-            color: #173e4c;
-
-            font-size: 25px;
-
-            margin-bottom: 6px;
-
-        }
-
-
-        .header p {
-
-            color: #74858c;
-
-            font-size: 13px;
-
-        }
-
-
-        .logout {
-
-            text-decoration: none;
-
-            background: #edf3f5;
-
-            color: #27677a;
-
-            padding:
-                10px 16px;
-
-            border-radius: 8px;
-
-            font-size: 12px;
-
-            font-weight: bold;
-
-        }
-
-
-        /* =================================================
-           MESSAGES
-        ================================================= */
-
-        .message {
-
-            padding: 12px 15px;
-
-            border-radius: 8px;
-
-            font-size: 12px;
-
-            margin-bottom: 20px;
-
-        }
-
-
-        .success {
-
-            background: #edf8f1;
-
-            color: #267344;
-
-            border:
-                1px solid #ccebd6;
-
-        }
-
-
-        .error {
-
-            background: #fff1f1;
-
-            color: #a82a2a;
-
-            border:
-                1px solid #f2cccc;
-
-        }
-
-
-        /* =================================================
-           CREATE ACCOUNT
-        ================================================= */
-
-        .create-card {
-
-            background: white;
-
-            border-radius: 14px;
-
-            padding: 25px;
-
-            margin-bottom: 22px;
-
-            box-shadow:
-                0 8px 25px
-                rgba(23, 57, 68, 0.08);
-
-        }
-
-
-        .create-card h2 {
-
-            color: #173e4c;
-
-            font-size: 19px;
-
-            margin-bottom: 7px;
-
-        }
-
-
-        .description {
-
-            color: #7a8990;
-
-            font-size: 12px;
-
-            margin-bottom: 20px;
-
-        }
-
-
-        .create-form {
-
-            display: grid;
-
-            grid-template-columns:
-                1fr
-                1fr
-                1fr
-                auto;
-
-            gap: 14px;
-
-            align-items: end;
-
-        }
-
-
-        .form-group label {
-
-            display: block;
-
-            font-size: 11px;
-
-            font-weight: bold;
-
-            color: #40545c;
-
-            margin-bottom: 6px;
-
-        }
-
-
-        input {
-
-            width: 100%;
-
-            height: 42px;
-
-            border:
-                1px solid #d7e0e4;
-
-            border-radius: 7px;
-
-            padding:
-                0 12px;
-
-            font-size: 12px;
-
-            outline: none;
-
-        }
-
-
-        input:focus {
-
-            border-color: #39758a;
-
-        }
-
-
-        .create-button {
-
-            height: 42px;
-
-            border: none;
-
-            border-radius: 7px;
-
-            padding:
-                0 18px;
-
-            background: #27677a;
-
-            color: white;
-
-            font-weight: bold;
-
-            font-size: 11px;
-
-            cursor: pointer;
-
-        }
-
-
-        .create-button:hover {
-
-            background: #1f5869;
-
-        }
-
-
-        /* =================================================
-           STAFF TABLE
-        ================================================= */
-
-        .staff-card {
-
-            background: white;
-
-            border-radius: 14px;
-
-            padding: 25px;
-
-            box-shadow:
-                0 8px 25px
-                rgba(23, 57, 68, 0.08);
-
-        }
-
-
-        .staff-card h2 {
-
-            color: #173e4c;
-
-            font-size: 19px;
-
-            margin-bottom: 7px;
-
-        }
-
-
-        .table-wrapper {
-
-            overflow-x: auto;
-
-        }
-
-
-        table {
-
-            width: 100%;
-
-            border-collapse: collapse;
-
-            min-width: 1000px;
-
-        }
-
-
-        th {
-
-            text-align: left;
-
-            padding:
-                13px 10px;
-
-            border-bottom:
-                1px solid #dfe7ea;
-
-            color: #71838a;
-
-            font-size: 10px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 0.4px;
-
-        }
-
-
-        td {
-
-            padding:
-                14px 10px;
-
-            border-bottom:
-                1px solid #edf0f1;
-
-            color: #43565e;
-
-            font-size: 12px;
-
-        }
-
-
-        .inline-form {
-
-            display: flex;
-
-            gap: 6px;
-
-            align-items: center;
-
-        }
-
-
-        .small-input {
-
-            width: 130px;
-
-            height: 34px;
-
-            font-size: 11px;
-
-        }
-
-
-        .small-button {
-
-            height: 34px;
-
-            border: none;
-
-            border-radius: 6px;
-
-            padding:
-                0 10px;
-
-            background: #27677a;
-
-            color: white;
-
-            font-size: 10px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-
-        }
-
-
-        .small-button:hover {
-
-            background: #1f5869;
-
-        }
-
-
-        .danger-button {
-
-            background: #a84a4a;
-
-        }
-
-
-        .danger-button:hover {
-
-            background: #8d3838;
-
-        }
-
-
-        .activate-button {
-
-            background: #397b55;
-
-        }
-
-
-        .activate-button:hover {
-
-            background: #2e6645;
-
-        }
-
-
-        .status {
-
-            display: inline-block;
-
-            padding:
-                5px 9px;
-
-            border-radius: 20px;
-
-            font-size: 9px;
-
-            font-weight: bold;
-
-            text-transform: uppercase;
-
-        }
-
-
-        .active {
-
-            background: #e9f6ee;
-
-            color: #2b7a48;
-
-        }
-
-
-        .inactive {
-
-            background: #fbeaea;
-
-            color: #a43a3a;
-
-        }
-
-
-        /* =================================================
-           RESPONSIVE
-        ================================================= */
-
-        @media (max-width: 1000px) {
-
-            .create-form {
-
-                grid-template-columns:
-                    1fr
-                    1fr;
-
-            }
-
-        }
-
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Hide Scrollbars */
+        html, body { scrollbar-width: none; -ms-overflow-style: none; }
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+        body { font-family: Arial, Helvetica, sans-serif; background: #eef4f6; color: #20353d; min-height: 100vh; padding: 25px; padding-bottom: 80px; /* Space for fixed footer */ }
+        .dashboard { width: min(1400px, 96%); margin: auto; }
+
+        .header { background: white; padding: 22px 28px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
+        .header h1 { color: #173e4c; font-size: 25px; margin-bottom: 6px; }
+        .header p { color: #74858c; font-size: 13px; }
+        .logout { text-decoration: none; background: #edf3f5; color: #27677a; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+
+        .message { padding: 12px 15px; border-radius: 8px; font-size: 12px; margin-bottom: 20px; }
+        .success { background: #edf8f1; color: #267344; border: 1px solid #ccebd6; }
+        .error { background: #fff1f1; color: #a82a2a; border: 1px solid #f2cccc; }
+
+        .create-card { background: white; border-radius: 14px; padding: 25px; margin-bottom: 22px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
+        .create-card h2 { color: #173e4c; font-size: 19px; margin-bottom: 7px; }
+        .description { color: #7a8990; font-size: 12px; margin-bottom: 20px; }
+        .create-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
+        .form-group label { display: block; font-size: 11px; font-weight: bold; color: #40545c; margin-bottom: 6px; }
+        input { width: 100%; height: 42px; border: 1px solid #d7e0e4; border-radius: 7px; padding: 0 12px; font-size: 12px; outline: none; }
+        input:focus { border-color: #39758a; }
+        .create-button { height: 42px; border: none; border-radius: 7px; padding: 0 18px; background: #27677a; color: white; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .create-button:hover { background: #1f5869; }
+
+        .staff-card { background: white; border-radius: 14px; padding: 25px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
+        .staff-card h2 { color: #173e4c; font-size: 19px; margin-bottom: 7px; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { text-align: left; padding: 13px 10px; border-bottom: 1px solid #dfe7ea; color: #71838a; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+        td { padding: 14px 10px; border-bottom: 1px solid #edf0f1; color: #43565e; font-size: 12px; }
+        .inline-form { display: flex; gap: 6px; align-items: center; }
+        .small-input { width: 130px; height: 34px; font-size: 11px; }
+        .small-button { height: 34px; border: none; border-radius: 6px; padding: 0 10px; background: #27677a; color: white; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .small-button:hover { background: #1f5869; }
+        .danger-button { background: #a84a4a; }
+        .danger-button:hover { background: #8d3838; }
+        .activate-button { background: #397b55; }
+        .activate-button:hover { background: #2e6645; }
+        .status { display: inline-block; padding: 5px 9px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+        .active { background: #e9f6ee; color: #2b7a48; }
+        .inactive { background: #fbeaea; color: #a43a3a; }
+
+        /* FIXED GLOBAL FOOTER */
+        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 11px; color: #6b7280; padding: 12px 10px; background: #ffffff; border-top: 1px solid #e5e7eb; z-index: 9999; }
+
+        @media (max-width: 1000px) { .create-form { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 650px) {
-
-            body {
-
-                padding: 12px;
-
-            }
-
-
-            .header {
-
-                flex-direction: column;
-
-                align-items: flex-start;
-
-                gap: 15px;
-
-            }
-
-
-            .create-form {
-
-                grid-template-columns: 1fr;
-
-            }
-
+            body { padding: 12px; padding-bottom: 70px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .create-form { grid-template-columns: 1fr; }
         }
-
     </style>
-
 </head>
-
-
 <body>
-
-
 <div class="dashboard">
-
-
-    <!-- =================================================
-         HEADER
-    ================================================= -->
-
     <header class="header">
-
         <div>
-
-            <h1>
-                Technician Dashboard
-            </h1>
-
-            <p>
-
-                {{ full_name }}
-
-                |
-
-                Technician ID:
-                {{ staff_id }}
-
-            </p>
-
+            <h1>Technician Dashboard</h1>
+            <p>{{ full_name }} | Technician ID: {{ staff_id }}</p>
         </div>
-
-
-        <a
-            href="{{ url_for('logout') }}"
-            class="logout"
-        >
-
-            Logout
-
-        </a>
-
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     </header>
 
-
-    <!-- =================================================
-         MESSAGES
-    ================================================= -->
-
-    {% if success %}
-
-        <div class="message success">
-
-            {{ success }}
-
-        </div>
-
-    {% endif %}
-
-
-    {% if error %}
-
-        <div class="message error">
-
-            {{ error }}
-
-        </div>
-
-    {% endif %}
-
-
-    <!-- =================================================
-         CREATE STAFF
-    ================================================= -->
+    {% if success %}<div class="message success">{{ success }}</div>{% endif %}
+    {% if error %}<div class="message error">{{ error }}</div>{% endif %}
 
     <section class="create-card">
-
-        <h2>
-            Add Staff Member
-        </h2>
-
-
-        <p class="description">
-
-            Create credentials for authorized
-            clinical personnel.
-
-        </p>
-
-
-        <form
-            class="create-form"
-            action="{{ url_for('create_staff') }}"
-            method="POST"
-        >
-
-
-            <div class="form-group">
-
-                <label>
-                    FULL NAME
-                </label>
-
-
-                <input
-                    type="text"
-                    name="full_name"
-                    placeholder="Staff member name"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    STAFF ID
-                </label>
-
-
-                <input
-                    type="text"
-                    name="staff_id"
-                    placeholder="STAFF003"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    INITIAL PASSWORD
-                </label>
-
-
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Minimum 8 characters"
-                    minlength="8"
-                    required
-                >
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="create-button"
-            >
-
-                ADD STAFF
-
-            </button>
-
-
+        <h2>Add Staff Member</h2>
+        <p class="description">Create credentials for authorized clinical personnel.</p>
+        <form class="create-form" action="{{ url_for('create_staff') }}" method="POST">
+            <div class="form-group"><label>FULL NAME</label><input type="text" name="full_name" placeholder="Staff member name" required></div>
+            <div class="form-group"><label>STAFF ID</label><input type="text" name="staff_id" placeholder="STAFF003" required></div>
+            <div class="form-group"><label>INITIAL PASSWORD</label><input type="password" name="password" placeholder="Minimum 8 characters" minlength="8" required></div>
+            <button type="submit" class="create-button">ADD STAFF</button>
         </form>
-
     </section>
-
-
-    <!-- =================================================
-         STAFF MANAGEMENT
-    ================================================= -->
 
     <section class="staff-card">
-
-
-        <h2>
-            Staff Account Management
-        </h2>
-
-
-        <p class="description">
-
-            Update staff information,
-            credentials, and account status.
-
-        </p>
-
-
+        <h2>Staff Account Management</h2>
+        <p class="description">Update staff information, credentials, and account status.</p>
         <div class="table-wrapper">
-
-
             <table>
-
-
                 <thead>
-
                     <tr>
-
-                        <th>
-                            Staff ID
-                        </th>
-
-                        <th>
-                            Name
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th>
-                            Change ID
-                        </th>
-
-                        <th>
-                            Change Password
-                        </th>
-
-                        <th>
-                            Change Name
-                        </th>
-
-                        <th>
-                            Account
-                        </th>
-
+                        <th>Staff ID</th><th>Name</th><th>Status</th><th>Change ID</th><th>Change Password</th><th>Change Name</th><th>Account</th>
                     </tr>
-
                 </thead>
-
-
                 <tbody>
-
-
                     {% for user in users %}
-
-
                     <tr>
-
-
-                        <!-- STAFF ID -->
-
+                        <td><strong>{{ user["staff_id"] }}</strong></td>
+                        <td>{{ user["full_name"] }}</td>
+                        <td>{% if user["status"] == "active" %}<span class="status active">Active</span>{% else %}<span class="status inactive">Inactive</span>{% endif %}</td>
                         <td>
-
-                            <strong>
-                                {{ user["staff_id"] }}
-                            </strong>
-
+                            <form class="inline-form" action="{{ url_for('update_staff_id_route') }}" method="POST">
+                                <input type="hidden" name="user_id" value="{{ user['id'] }}">
+                                <input class="small-input" type="text" name="new_staff_id" placeholder="New ID" required>
+                                <button class="small-button" type="submit">UPDATE</button>
+                            </form>
                         </td>
-
-
-                        <!-- NAME -->
-
                         <td>
-
-                            {{ user["full_name"] }}
-
+                            <form class="inline-form" action="{{ url_for('update_staff_password_route') }}" method="POST">
+                                <input type="hidden" name="user_id" value="{{ user['id'] }}">
+                                <input class="small-input" type="password" name="new_password" placeholder="New password" minlength="8" required>
+                                <button class="small-button" type="submit">UPDATE</button>
+                            </form>
                         </td>
-
-
-                        <!-- STATUS -->
-
                         <td>
-
+                            <form class="inline-form" action="{{ url_for('update_staff_name_route') }}" method="POST">
+                                <input type="hidden" name="user_id" value="{{ user['id'] }}">
+                                <input class="small-input" type="text" name="new_name" placeholder="New name" required>
+                                <button class="small-button" type="submit">UPDATE</button>
+                            </form>
+                        </td>
+                        <td>
                             {% if user["status"] == "active" %}
-
-                                <span
-                                    class="status active"
-                                >
-
-                                    Active
-
-                                </span>
-
-                            {% else %}
-
-                                <span
-                                    class="status inactive"
-                                >
-
-                                    Inactive
-
-                                </span>
-
-                            {% endif %}
-
-                        </td>
-
-
-                        <!-- CHANGE STAFF ID -->
-
-                        <td>
-
-                            <form
-                                class="inline-form"
-                                action="{{ url_for('update_staff_id_route') }}"
-                                method="POST"
-                            >
-
-                                <input
-                                    type="hidden"
-                                    name="user_id"
-                                    value="{{ user['id'] }}"
-                                >
-
-
-                                <input
-                                    class="small-input"
-                                    type="text"
-                                    name="new_staff_id"
-                                    placeholder="New ID"
-                                    required
-                                >
-
-
-                                <button
-                                    class="small-button"
-                                    type="submit"
-                                >
-
-                                    UPDATE
-
-                                </button>
-
-                            </form>
-
-                        </td>
-
-
-                        <!-- CHANGE PASSWORD -->
-
-                        <td>
-
-                            <form
-                                class="inline-form"
-                                action="{{ url_for('update_staff_password_route') }}"
-                                method="POST"
-                            >
-
-                                <input
-                                    type="hidden"
-                                    name="user_id"
-                                    value="{{ user['id'] }}"
-                                >
-
-
-                                <input
-                                    class="small-input"
-                                    type="password"
-                                    name="new_password"
-                                    placeholder="New password"
-                                    minlength="8"
-                                    required
-                                >
-
-
-                                <button
-                                    class="small-button"
-                                    type="submit"
-                                >
-
-                                    UPDATE
-
-                                </button>
-
-                            </form>
-
-                        </td>
-
-
-                        <!-- CHANGE NAME -->
-
-                        <td>
-
-                            <form
-                                class="inline-form"
-                                action="{{ url_for('update_staff_name_route') }}"
-                                method="POST"
-                            >
-
-                                <input
-                                    type="hidden"
-                                    name="user_id"
-                                    value="{{ user['id'] }}"
-                                >
-
-
-                                <input
-                                    class="small-input"
-                                    type="text"
-                                    name="new_name"
-                                    placeholder="New name"
-                                    required
-                                >
-
-
-                                <button
-                                    class="small-button"
-                                    type="submit"
-                                >
-
-                                    UPDATE
-
-                                </button>
-
-                            </form>
-
-                        </td>
-
-
-                        <!-- ACTIVATE / DEACTIVATE -->
-
-                        <td>
-
-
-                            {% if user["status"] == "active" %}
-
-
-                                <form
-                                    action="{{ url_for('deactivate_staff_route') }}"
-                                    method="POST"
-                                >
-
-                                    <input
-                                        type="hidden"
-                                        name="user_id"
-                                        value="{{ user['id'] }}"
-                                    >
-
-
-                                    <button
-                                        type="submit"
-                                        class="small-button danger-button"
-                                    >
-
-                                        DEACTIVATE
-
-                                    </button>
-
+                                <form action="{{ url_for('deactivate_staff_route') }}" method="POST">
+                                    <input type="hidden" name="user_id" value="{{ user['id'] }}">
+                                    <button type="submit" class="small-button danger-button">DEACTIVATE</button>
                                 </form>
-
-
                             {% else %}
-
-
-                                <form
-                                    action="{{ url_for('activate_staff_route') }}"
-                                    method="POST"
-                                >
-
-                                    <input
-                                        type="hidden"
-                                        name="user_id"
-                                        value="{{ user['id'] }}"
-                                    >
-
-
-                                    <button
-                                        type="submit"
-                                        class="small-button activate-button"
-                                    >
-
-                                        ACTIVATE
-
-                                    </button>
-
+                                <form action="{{ url_for('activate_staff_route') }}" method="POST">
+                                    <input type="hidden" name="user_id" value="{{ user['id'] }}">
+                                    <button type="submit" class="small-button activate-button">ACTIVATE</button>
                                 </form>
-
-
                             {% endif %}
-
-
                         </td>
-
-
                     </tr>
-
-
                     {% else %}
-
-
-                    <tr>
-
-                        <td colspan="7">
-
-                            No staff accounts found.
-
-                        </td>
-
-                    </tr>
-
-
+                    <tr><td colspan="7">No staff accounts found.</td></tr>
                     {% endfor %}
-
-
                 </tbody>
-
-
             </table>
-
-
         </div>
-
-
     </section>
-
-
 </div>
 
-
+<div class="global-footer">All predictions and generated reports must be reviewed by a healthcare worker.</div>
 </body>
-
 </html>

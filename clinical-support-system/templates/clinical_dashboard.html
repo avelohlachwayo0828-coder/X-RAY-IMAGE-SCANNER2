@@ -2,2038 +2,409 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Clinical Support System
-    </title>
-
-    <link
-        rel="icon"
-        type="image/jpeg"
-        href="{{ url_for('static', filename='images/hospital-logo.png') }}"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Support System</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/hospital-logo.jpg') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html,
-        body {
-
-            width: 100%;
-            height: 100%;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #f4f7fb;
-
-            color: #1f2937;
-
-            overflow: hidden;
-        }
-
-        .app {
-
-            width: 100vw;
-            height: 100vh;
-
-            display: flex;
-
-            overflow: hidden;
-        }
-
-        /* =================================================
-           SIDEBAR
-           ================================================= */
-
-        .sidebar {
-
-            width: 250px;
-            min-width: 250px;
-
-            height: 100vh;
-
-            background: #ffffff;
-
-            border-right:
-                1px solid #e5e7eb;
-
-            display: flex;
-
-            flex-direction: column;
-
-            padding: 22px 16px;
-        }
-
-        .logo-container {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-
-            padding:
-                4px 8px 24px 8px;
-
-            border-bottom:
-                1px solid #edf0f4;
-        }
-
-        .logo {
-
-            width: 48px;
-            height: 48px;
-
-            object-fit: contain;
-
-            border-radius: 8px;
-        }
-
-        .logo-text {
-
-            font-size: 17px;
-
-            font-weight: 700;
-
-            color: #172033;
-
-            line-height: 1.2;
-        }
-
-        .logo-subtitle {
-
-            margin-top: 3px;
-
-            font-size: 11px;
-
-            color: #7b8494;
-        }
-
-        .navigation {
-
-            margin-top: 24px;
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 6px;
-        }
-
-        .nav-button {
-
-            width: 100%;
-
-            border: none;
-
-            background: transparent;
-
-            padding: 13px 14px;
-
-            border-radius: 9px;
-
-            text-align: left;
-
-            font-size: 14px;
-
-            font-weight: 500;
-
-            color: #596273;
-
-            cursor: pointer;
-        }
-
-        .nav-button:hover {
-
-            background: #f1f5f9;
-
-            color: #172033;
-        }
-
-        .nav-button.active {
-
-            background: #eaf2ff;
-
-            color: #2563eb;
-
-            font-weight: 600;
-        }
-
-        .sidebar-footer {
-
-            margin-top: auto;
-
-            border-top:
-                1px solid #edf0f4;
-
-            padding-top: 16px;
-        }
-
-        .staff-info {
-
-            padding:
-                10px 8px 14px 8px;
-        }
-
-        .staff-name {
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            color: #202938;
-        }
-
-        .staff-id {
-
-            margin-top: 4px;
-
-            font-size: 11px;
-
-            color: #7b8494;
-        }
-
-        .logout-button {
-
-            display: block;
-
-            width: 100%;
-
-            padding: 11px;
-
-            border-radius: 8px;
-
-            text-align: center;
-
-            text-decoration: none;
-
-            font-size: 13px;
-
-            color: #b42318;
-
-            background: #fff3f2;
-        }
-
-        .logout-button:hover {
-
-            background: #fee4e2;
-        }
-
-        /* =================================================
-           MAIN
-           ================================================= */
-
-        .main {
-
-            flex: 1;
-
-            height: 100vh;
-
-            min-width: 0;
-
-            overflow-y: auto;
-
-            padding:
-                28px 34px 40px 34px;
-        }
-
-        .topbar {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            margin-bottom: 28px;
-        }
-
-        .page-title {
-
-            font-size: 25px;
-
-            font-weight: 700;
-
-            color: #172033;
-        }
-
-        .page-subtitle {
-
-            margin-top: 5px;
-
-            font-size: 13px;
-
-            color: #778195;
-        }
-
-        .user-badge {
-
-            background: #ffffff;
-
-            border:
-                1px solid #e4e8ef;
-
-            padding:
-                9px 14px;
-
-            border-radius: 9px;
-
-            font-size: 12px;
-
-            color: #596273;
-        }
-
-        /* =================================================
-           MESSAGES
-           ================================================= */
-
-        .messages {
-
-            margin-bottom: 20px;
-        }
-
-        .message {
-
-            padding: 12px 15px;
-
-            border-radius: 8px;
-
-            margin-bottom: 8px;
-
-            font-size: 13px;
-        }
-
-        .message.success {
-
-            background: #ecfdf3;
-
-            color: #067647;
-
-            border:
-                1px solid #abefc6;
-        }
-
-        .message.error {
-
-            background: #fef3f2;
-
-            color: #b42318;
-
-            border:
-                1px solid #fecdca;
-        }
-
-        /* =================================================
-           SECTIONS
-           ================================================= */
-
-        .content-section {
-
-            display: none;
-        }
-
-        .content-section.active {
-
-            display: block;
-        }
-
-        /* =================================================
-           STATISTICS
-           ================================================= */
-
-        .stats-grid {
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
-
-            gap: 16px;
-
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-
-            background: #ffffff;
-
-            border:
-                1px solid #e5e9f0;
-
-            border-radius: 12px;
-
-            padding: 20px;
-        }
-
-        .stat-label {
-
-            font-size: 12px;
-
-            color: #7b8494;
-
-            margin-bottom: 10px;
-        }
-
-        .stat-number {
-
-            font-size: 28px;
-
-            font-weight: 700;
-
-            color: #172033;
-        }
-
-        /* =================================================
-           CARDS
-           ================================================= */
-
-        .dashboard-grid {
-
-            display: grid;
-
-            grid-template-columns:
-                2fr 1fr;
-
-            gap: 20px;
-        }
-
-        .card {
-
-            background: #ffffff;
-
-            border:
-                1px solid #e5e9f0;
-
-            border-radius: 12px;
-
-            padding: 22px;
-
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-
-            font-size: 17px;
-
-            font-weight: 700;
-
-            color: #172033;
-
-            margin-bottom: 7px;
-        }
-
-        .card-description {
-
-            font-size: 13px;
-
-            color: #7b8494;
-
-            line-height: 1.5;
-
-            margin-bottom: 20px;
-        }
-
-        .primary-button {
-
-            border: none;
-
-            background: #2563eb;
-
-            color: #ffffff;
-
-            padding:
-                12px 20px;
-
-            border-radius: 8px;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-        }
-
-        .primary-button:hover {
-
-            background: #1d4ed8;
-        }
-
-        /* =================================================
-           UPLOAD
-           ================================================= */
-
-        .upload-card {
-
-            max-width: 900px;
-        }
-
-        .upload-area {
-
-            border:
-                2px dashed #cbd5e1;
-
-            border-radius: 12px;
-
-            padding: 35px 25px;
-
-            text-align: center;
-
-            background: #fafcff;
-        }
-
-        .upload-area h3 {
-
-            font-size: 18px;
-
-            margin-bottom: 8px;
-
-            color: #172033;
-        }
-
-        .upload-area p {
-
-            font-size: 13px;
-
-            color: #7b8494;
-        }
-
-        .upload-button {
-
-            display: inline-block;
-
-            margin-top: 20px;
-
-            padding:
-                11px 20px;
-
-            border-radius: 8px;
-
-            background: #2563eb;
-
-            color: #ffffff;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-        }
-
-        .selected-file {
-
-            margin-top: 14px;
-
-            min-height: 18px;
-
-            font-size: 12px !important;
-
-            color: #475467 !important;
-        }
-
-        .upload-actions {
-
-            display: flex;
-
-            justify-content: center;
-
-            margin-top: 20px;
-        }
-
-        /* =================================================
-           IMAGE PREVIEW
-           ================================================= */
-
-        .preview-container {
-
-            display: none;
-
-            margin-top: 25px;
-        }
-
-        .preview-title {
-
-            font-size: 14px;
-
-            font-weight: 600;
-
-            color: #344054;
-
-            margin-bottom: 12px;
-        }
-
-        .preview-image-wrapper {
-
-            position: relative;
-
-            width: 100%;
-
-            max-width: 700px;
-
-            margin: auto;
-
-            background: #111827;
-
-            border-radius: 10px;
-
-            overflow: hidden;
-        }
-
-        .preview-image {
-
-            display: block;
-
-            width: 100%;
-
-            max-height: 520px;
-
-            object-fit: contain;
-
-            background: #111827;
-        }
-
-        /* =================================================
-           SCAN OVERLAY
-           ================================================= */
-
-        .scan-overlay {
-
-            position: absolute;
-
-            inset: 0;
-
-            display: none;
-
-            background:
-                rgba(15, 23, 42, 0.25);
-
-            pointer-events: none;
-        }
-
-        .scan-overlay.active {
-
-            display: block;
-        }
-
-        .scan-line {
-
-            position: absolute;
-
-            left: 0;
-
-            right: 0;
-
-            height: 3px;
-
-            background: #60a5fa;
-
-            box-shadow:
-                0 0 12px
-                rgba(96, 165, 250, 0.9);
-
-            animation:
-                scanLine 2.2s
-                ease-in-out
-                infinite;
-        }
-
-        @keyframes scanLine {
-
-            0% {
-                top: 5%;
-            }
-
-            50% {
-                top: 94%;
-            }
-
-            100% {
-                top: 5%;
-            }
-        }
-
-        /* =================================================
-           MAGNIFYING GLASS
-           ================================================= */
-
-        .magnifier {
-
-            position: absolute;
-
-            width: 65px;
-            height: 65px;
-
-            border:
-                4px solid #ffffff;
-
-            border-radius: 50%;
-
-            box-shadow:
-                0 3px 12px
-                rgba(0, 0, 0, 0.3);
-
-            animation:
-                magnifierMove 2.2s
-                ease-in-out
-                infinite;
-        }
-
-        .magnifier::after {
-
-            content: "";
-
-            position: absolute;
-
-            width: 30px;
-            height: 5px;
-
-            background: #ffffff;
-
-            border-radius: 5px;
-
-            right: -24px;
-            bottom: -12px;
-
-            transform:
-                rotate(45deg);
-
-            transform-origin:
-                left center;
-        }
-
-        @keyframes magnifierMove {
-
-            0% {
-                left: 12%;
-                top: 10%;
-            }
-
-            25% {
-                left: 68%;
-                top: 20%;
-            }
-
-            50% {
-                left: 55%;
-                top: 65%;
-            }
-
-            75% {
-                left: 18%;
-                top: 72%;
-            }
-
-            100% {
-                left: 12%;
-                top: 10%;
-            }
-        }
-
-        .scan-text {
-
-            position: absolute;
-
-            left: 50%;
-
-            bottom: 25px;
-
-            transform:
-                translateX(-50%);
-
-            background:
-                rgba(15, 23, 42, 0.88);
-
-            color: #ffffff;
-
-            padding:
-                10px 18px;
-
-            border-radius: 7px;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            white-space: nowrap;
-        }
-
-        /* =================================================
-           TABLE
-           ================================================= */
-
-        .table-card {
-
-            background: #ffffff;
-
-            border:
-                1px solid #e5e9f0;
-
-            border-radius: 12px;
-
-            overflow: hidden;
-        }
-
-        .table-container {
-
-            width: 100%;
-
-            overflow-x: auto;
-        }
-
-        table {
-
-            width: 100%;
-
-            border-collapse: collapse;
-
-            min-width: 850px;
-        }
-
-        th {
-
-            background: #f8fafc;
-
-            text-align: left;
-
-            padding:
-                14px 16px;
-
-            font-size: 11px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 0.04em;
-
-            color: #7b8494;
-
-            border-bottom:
-                1px solid #e5e9f0;
-        }
-
-        td {
-
-            padding:
-                15px 16px;
-
-            font-size: 13px;
-
-            color: #344054;
-
-            border-bottom:
-                1px solid #edf0f4;
-        }
-
-        .status {
-
-            display: inline-block;
-
-            padding:
-                5px 9px;
-
-            border-radius: 20px;
-
-            font-size: 11px;
-
-            font-weight: 600;
-
-            text-transform: capitalize;
-        }
-
-        .status.pending {
-
-            background: #fff7ed;
-
-            color: #c2410c;
-        }
-
-        .status.analysed {
-
-            background: #ecfdf3;
-
-            color: #067647;
-        }
-
-        .status.failed {
-
-            background: #fef3f2;
-
-            color: #b42318;
-        }
-
-        .view-button {
-
-            display: inline-block;
-
-            padding:
-                7px 11px;
-
-            border-radius: 7px;
-
-            background: #eaf2ff;
-
-            color: #2563eb;
-
-            text-decoration: none;
-
-            font-size: 12px;
-
-            font-weight: 600;
-        }
-
-        .view-button:hover {
-
-            background: #dbeafe;
-        }
-
-        .empty-state {
-
-            padding:
-                50px 20px;
-
-            text-align: center;
-
-            color: #7b8494;
-
-            font-size: 13px;
-        }
-
-        /* =================================================
-           RESULT SUMMARY
-           ================================================= */
-
-        .result-card {
-
-            margin-top: 20px;
-
-            padding: 20px;
-
-            background: #f8fafc;
-
-            border:
-                1px solid #e5e9f0;
-
-            border-radius: 10px;
-        }
-
-        .result-title {
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            color: #667085;
-
-            margin-bottom: 7px;
-        }
-
-        .result-value {
-
-            font-size: 20px;
-
-            font-weight: 700;
-
-            color: #172033;
-        }
-
-        /* =================================================
-           RESPONSIVE
-           ================================================= */
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        /* Hide Scrollbars */
+        html, body, .main, .sidebar { scrollbar-width: none; -ms-overflow-style: none; }
+        html::-webkit-scrollbar, body::-webkit-scrollbar, .main::-webkit-scrollbar, .sidebar::-webkit-scrollbar { display: none; }
+
+        html, body { width: 100%; height: 100%; font-family: Arial, Helvetica, sans-serif; background: #f4f7fb; color: #1f2937; overflow: hidden; }
+        .app { width: 100vw; height: 100vh; display: flex; overflow: hidden; position: relative; }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 260px; 
+            min-width: 260px; 
+            height: 100vh; 
+            background: #ffffff; 
+            border-right: 1px solid #e5e7eb; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 22px 16px 70px 16px; 
+            transition: transform 0.3s ease; 
+            z-index: 100; 
+        }
+        .sidebar.closed { transform: translateX(-100%); position: absolute; }
+        
+        .toggle-sidebar { position: absolute; right: -40px; top: 20px; background: #2563eb; color: white; border: none; border-radius: 0 8px 8px 0; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 101; }
+        .sidebar.closed .toggle-sidebar { position: fixed; left: 0; top: 20px; border-radius: 0 8px 8px 0; }
+
+        .logo-container { display: flex; align-items: center; gap: 12px; padding: 4px 8px 24px 8px; border-bottom: 1px solid #edf0f4; }
+        .logo { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; }
+        .logo-text { font-size: 17px; font-weight: 700; color: #172033; line-height: 1.2; }
+        .logo-subtitle { margin-top: 3px; font-size: 11px; color: #7b8494; font-style: italic; }
+
+        .navigation { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; }
+        
+        .nav-button { width: 100%; border: none; background: transparent; padding: 13px 14px; border-radius: 9px; text-align: left; font-size: 14px; font-weight: 500; color: #596273; cursor: pointer; transition: all 0.2s ease; }
+        .nav-button:hover { background: #f1f5f9; color: #172033; }
+        .nav-button.active { background: #eaf2ff; color: #2563eb; font-weight: 600; }
+
+        .sidebar-footer { margin-top: auto; padding-top: 10px; }
+        .staff-info { padding: 10px 8px 14px 8px; }
+        .staff-name { font-size: 13px; font-weight: 600; color: #202938; }
+        .staff-id { margin-top: 4px; font-size: 11px; color: #7b8494; }
+        .logout-button { display: block; width: 100%; padding: 11px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; color: #b42318; background: #fff3f2; transition: background 0.2s; }
+        .logout-button:hover { background: #fee4e2; }
+
+        /* MAIN */
+        .main { flex: 1; height: 100vh; min-width: 0; overflow-y: auto; padding: 28px 34px 80px 34px; transition: margin-left 0.3s ease; }
+        .main.expanded { margin-left: 0; }
+
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .page-title { font-size: 25px; font-weight: 700; color: #172033; }
+        .page-subtitle { margin-top: 5px; font-size: 13px; color: #778195; }
+        .user-badge { background: #ffffff; border: 1px solid #e4e8ef; padding: 9px 14px; border-radius: 9px; font-size: 12px; color: #596273; }
+
+        /* MESSAGES & SECTIONS */
+        .messages { margin-bottom: 20px; }
+        .message { padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+        .message.success { background: #ecfdf3; color: #067647; border: 1px solid #abefc6; }
+        .message.error { background: #fef3f2; color: #b42318; border: 1px solid #fecdca; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        /* CARDS & TABLES */
+        .card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; padding: 22px; margin-bottom: 20px; }
+        .card-title { font-size: 17px; font-weight: 700; color: #172033; margin-bottom: 7px; }
+        .card-description { font-size: 13px; color: #7b8494; line-height: 1.5; margin-bottom: 20px; }
+        .primary-button { border: none; background: #2563eb; color: #ffffff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .primary-button:hover { background: #1d4ed8; }
+
+        .table-card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; overflow: hidden; }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 850px; }
+        th { background: #f8fafc; text-align: left; padding: 14px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #7b8494; border-bottom: 1px solid #e5e9f0; }
+        td { padding: 15px 16px; font-size: 13px; color: #344054; border-bottom: 1px solid #edf0f4; }
+        .status { display: inline-block; padding: 5px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+        .status.pending { background: #fff7ed; color: #c2410c; }
+        .status.analysed { background: #ecfdf3; color: #067647; }
+        .status.failed { background: #fef3f2; color: #b42318; }
+        .view-button { display: inline-block; padding: 7px 11px; border-radius: 7px; background: #eaf2ff; color: #2563eb; text-decoration: none; font-size: 12px; font-weight: 600; }
+        .view-button:hover { background: #dbeafe; }
+        .empty-state { padding: 50px 20px; text-align: center; color: #7b8494; font-size: 13px; }
+        .flag-badge { display: inline-block; margin-top: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+
+        /* STATS & CHARTS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; padding: 20px; }
+        .stat-label { font-size: 12px; color: #7b8494; margin-bottom: 10px; }
+        .stat-number { font-size: 28px; font-weight: 700; color: #172033; }
+        .chart-container { position: relative; height: 300px; width: 100%; margin-top: 15px; }
+
+        /* UPLOAD AREA */
+        .upload-card { max-width: 900px; }
+        .upload-area { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 45px 25px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+        .upload-area:hover { background: #f1f5f9; border-color: #2563eb; }
+        .upload-icon { width: 48px; height: 48px; color: #2563eb; margin-bottom: 15px; }
+        .upload-text { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+        .upload-subtext { font-size: 12px; color: #64748b; }
+        .selected-file { margin-top: 14px; min-height: 18px; font-size: 12px; color: #475467; }
+        .upload-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .preview-container { display: none; margin-top: 25px; }
+        .preview-title { font-size: 14px; font-weight: 600; color: #344054; margin-bottom: 12px; }
+        .preview-image-wrapper { position: relative; width: 100%; max-width: 700px; margin: auto; background: #111827; border-radius: 10px; overflow: hidden; }
+        .preview-image { display: block; width: 100%; max-height: 520px; object-fit: contain; background: #111827; }
+        .scan-overlay { position: absolute; inset: 0; display: none; background: rgba(15, 23, 42, 0.25); pointer-events: none; }
+        .scan-overlay.active { display: block; }
+        .scan-line { position: absolute; left: 0; right: 0; height: 3px; background: #60a5fa; box-shadow: 0 0 12px rgba(96, 165, 250, 0.9); animation: scanLine 2.2s ease-in-out infinite; }
+        @keyframes scanLine { 0% { top: 5%; } 50% { top: 94%; } 100% { top: 5%; } }
+        .magnifier { position: absolute; width: 65px; height: 65px; border: 4px solid #ffffff; border-radius: 50%; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3); animation: magnifierMove 2.2s ease-in-out infinite; }
+        .magnifier::after { content: ""; position: absolute; width: 30px; height: 5px; background: #ffffff; border-radius: 5px; right: -24px; bottom: -12px; transform: rotate(45deg); transform-origin: left center; }
+        @keyframes magnifierMove { 0% { left: 12%; top: 10%; } 25% { left: 68%; top: 20%; } 50% { left: 55%; top: 65%; } 75% { left: 18%; top: 72%; } 100% { left: 12%; top: 10%; } }
+        .scan-text { position: absolute; left: 50%; bottom: 25px; transform: translateX(-50%); background: rgba(15, 23, 42, 0.88); color: #ffffff; padding: 10px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+        /* FIXED GLOBAL FOOTER */
+        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 11px; color: #6b7280; padding: 12px 10px; background: #ffffff; border-top: 1px solid #e5e7eb; z-index: 9999; }
+
+        /* RESPONSIVE */
         @media (max-width: 1100px) {
-
-            .sidebar {
-
-                width: 220px;
-
-                min-width: 220px;
-            }
-
-            .main {
-
-                padding: 24px;
-            }
-
-            .stats-grid {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .dashboard-grid {
-
-                grid-template-columns: 1fr;
-            }
+            .sidebar { width: 220px; min-width: 220px; }
+            .main { padding: 24px; padding-bottom: 80px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (max-width: 750px) {
-
-            body {
-
-                overflow: auto;
-            }
-
-            .app {
-
-                min-height: 100vh;
-
-                height: auto;
-
-                flex-direction: column;
-            }
-
-            .sidebar {
-
-                width: 100%;
-
-                min-width: 0;
-
-                height: auto;
-
-                border-right: none;
-
-                border-bottom:
-                    1px solid #e5e7eb;
-
-                padding: 14px;
-            }
-
-            .navigation {
-
-                flex-direction: row;
-
-                overflow-x: auto;
-
-                margin-top: 12px;
-            }
-
-            .nav-button {
-
-                white-space: nowrap;
-
-                width: auto;
-            }
-
-            .sidebar-footer {
-
-                display: none;
-            }
-
-            .main {
-
-                height: auto;
-
-                overflow: visible;
-
-                padding: 20px;
-            }
-
-            .topbar {
-
-                align-items: flex-start;
-
-                gap: 15px;
-
-                flex-direction: column;
-            }
-
-            .stats-grid {
-
-                grid-template-columns: 1fr;
-            }
+            body { overflow: auto; }
+            .app { min-height: 100vh; height: auto; flex-direction: column; }
+            .sidebar { width: 100%; min-width: 0; height: auto; border-right: none; border-bottom: 1px solid #e5e7eb; padding: 14px 14px 80px 14px; transform: none !important; }
+            .sidebar.closed { display: none; }
+            .toggle-sidebar { position: fixed; right: 20px; top: 20px; border-radius: 8px; }
+            .navigation { flex-direction: row; overflow-x: auto; margin-top: 12px; }
+            .nav-button { white-space: nowrap; width: auto; }
+            .sidebar-footer { display: none; }
+            .main { height: auto; overflow: visible; padding: 20px; padding-bottom: 80px; }
+            .topbar { align-items: flex-start; gap: 15px; flex-direction: column; }
+            .stats-grid { grid-template-columns: 1fr; }
         }
-
     </style>
-
 </head>
 
-
 <body>
-
 <div class="app">
-
-    <!-- =================================================
-         SIDEBAR
-         ================================================= -->
-
-    <aside class="sidebar">
-
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
         <div class="logo-container">
-
-            <img
-                src="{{ url_for('static', filename='images/hospital-logo.png') }}"
-                alt="Hospital Logo"
-                class="logo"
-            >
-
+            <img src="{{ url_for('static', filename='images/hospital-logo.jpg') }}" alt="Hospital Logo" class="logo">
             <div>
-
-                <div class="logo-text">
-                    Clinical Support
-                </div>
-
-                <div class="logo-subtitle">
-                    Hospital System
-                </div>
-
+                <div class="logo-text">Clinical Support</div>
+                <div class="logo-subtitle">To Assist, Not to Replace</div>
             </div>
-
         </div>
-
-
         <nav class="navigation">
-
-            <button
-                class="nav-button active"
-                onclick="showSection('dashboard', this)"
-            >
-                Dashboard
-            </button>
-
-            <button
-                class="nav-button"
-                onclick="showSection('new-scan', this)"
-            >
-                New Scan
-            </button>
-
-            <button
-                class="nav-button"
-                onclick="showSection('history', this)"
-            >
-                History
-            </button>
-
-            <button
-                class="nav-button"
-                onclick="showSection('statistics', this)"
-            >
-                Statistics
-            </button>
-
-            <button
-                class="nav-button"
-                onclick="showSection('reports', this)"
-            >
-                Reports
-            </button>
-
+            <button class="nav-button active" onclick="showSection('new-scan', this)">New Scan</button>
+            <button class="nav-button" onclick="showSection('history', this)">History</button>
+            <button class="nav-button" onclick="showSection('reports', this)">Reports</button>
         </nav>
-
-
         <div class="sidebar-footer">
-
             <div class="staff-info">
-
-                <div class="staff-name">
-                    {{ full_name }}
-                </div>
-
-                <div class="staff-id">
-                    {{ staff_id }}
-                </div>
-
+                <div class="staff-name">{{ full_name }}</div>
+                <div class="staff-id">{{ staff_id }}</div>
             </div>
-
-            <a
-                href="{{ url_for('logout') }}"
-                class="logout-button"
-            >
-                Logout
-            </a>
-
+            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
         </div>
-
     </aside>
 
-
-    <!-- =================================================
-         MAIN
-         ================================================= -->
-
-    <main class="main">
-
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main-content">
         <div class="topbar">
-
             <div>
-
-                <h1 class="page-title">
-                    Clinical Dashboard
-                </h1>
-
-                <p class="page-subtitle">
-                    AI-Based Clinical Support System
-                </p>
-
+                <h1 class="page-title" id="page-title">New X-ray Analysis</h1>
+                <p class="page-subtitle" id="page-subtitle">AI-Based Clinical Support System</p>
             </div>
-
-            <div class="user-badge">
-
-                {{ full_name }}
-                |
-                {{ staff_id }}
-
-            </div>
-
+            <div class="user-badge">{{ full_name }} | {{ staff_id }}</div>
         </div>
 
-
-        <!-- =================================================
-             FLASH MESSAGES
-             ================================================= -->
-
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
-
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-
                 <div class="messages">
-
                     {% for category, message in messages %}
-
-                        <div
-                            class="message {{ category }}"
-                        >
-                            {{ message }}
-                        </div>
-
+                        <div class="message {{ category }}">{{ message }}</div>
                     {% endfor %}
-
                 </div>
-
             {% endif %}
-
         {% endwith %}
 
-
-        <!-- =================================================
-             DASHBOARD
-             ================================================= -->
-
-        <section
-            id="dashboard"
-            class="content-section active"
-        >
-
-            <div class="stats-grid">
-
-                <div class="stat-card">
-
-                    <div class="stat-label">
-                        Total Cases
-                    </div>
-
-                    <div class="stat-number">
-                        {{ statistics.total_cases or 0 }}
-                    </div>
-
-                </div>
-
-                <div class="stat-card">
-
-                    <div class="stat-label">
-                        Analysed
-                    </div>
-
-                    <div class="stat-number">
-                        {{ statistics.analysed_cases or 0 }}
-                    </div>
-
-                </div>
-
-                <div class="stat-card">
-
-                    <div class="stat-label">
-                        Pending
-                    </div>
-
-                    <div class="stat-number">
-                        {{ statistics.pending_cases or 0 }}
-                    </div>
-
-                </div>
-
-                <div class="stat-card">
-
-                    <div class="stat-label">
-                        Failed
-                    </div>
-
-                    <div class="stat-number">
-                        {{ statistics.failed_cases or 0 }}
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="dashboard-grid">
-
-                <div class="card">
-
-                    <div class="card-title">
-                        New X-ray Analysis
-                    </div>
-
-                    <div class="card-description">
-
-                        Upload a chest X-ray and
-                        run the clinical analysis
-                        system.
-
-                    </div>
-
-                    <button
-                        class="primary-button"
-                        onclick="showSectionById('new-scan')"
-                    >
-                        Start New Scan
-                    </button>
-
-                </div>
-
-
-                <div class="card">
-
-                    <div class="card-title">
-                        System Status
-                    </div>
-
-                    <div class="card-description">
-
-                        The clinical support system
-                        is ready for X-ray analysis.
-
-                    </div>
-
-                    <span class="status analysed">
-                        System Ready
-                    </span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             NEW SCAN
-             ================================================= -->
-
-        <section
-            id="new-scan"
-            class="content-section"
-        >
-
+        <!-- NEW SCAN -->
+        <section id="new-scan" class="content-section active">
             <div class="card">
-
-                <div class="card-title">
-                    New X-ray Analysis
-                </div>
-
-                <div class="card-description">
-
-                    Select a chest X-ray image.
-                    The image will be analysed by
-                    the clinical support model and
-                    a Grad-CAM heatmap will be
-                    generated.
-
-                </div>
-
-
+                <div class="card-title">New X-ray Analysis</div>
+                <div class="card-description">Select a single chest X-ray image. The image will be analysed by the clinical support model and a Grad-CAM heatmap will be generated.</div>
                 <div class="upload-card">
-
-                    <form
-                        id="scan-form"
-                        action="{{ url_for('new_scan') }}"
-                        method="POST"
-                        enctype="multipart/form-data"
-                    >
-
-                        <div class="upload-area">
-
-                            <h3>
-                                Select Chest X-ray
-                            </h3>
-
-                            <p>
-                                Supported formats:
-                                JPG, JPEG and PNG
-                            </p>
-
-                            <label
-                                for="xray"
-                                class="upload-button"
-                            >
-                                Select X-ray
-                            </label>
-
-                            <input
-                                type="file"
-                                id="xray"
-                                name="xray"
-                                accept=".jpg,.jpeg,.png"
-                                required
-                                hidden
-                            >
-
-                            <p
-                                id="selected-file"
-                                class="selected-file"
-                            >
-                                No file selected
-                            </p>
-
+                    <form id="scan-form" action="{{ url_for('new_scan') }}" method="POST" enctype="multipart/form-data">
+                        <div class="upload-area" onclick="document.getElementById('xray').click()">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"></path>
+                                <path d="M12 12v9"></path>
+                                <path d="M8 17l4-4 4 4"></path>
+                            </svg>
+                            <p class="upload-text">Click to upload a chest X-ray</p>
+                            <p class="upload-subtext">Supported formats: JPG, JPEG, PNG</p>
+                            <input type="file" id="xray" name="xray" accept=".jpg,.jpeg,.png" required hidden>
+                            <p id="selected-file" class="selected-file">No file selected</p>
                         </div>
-
-
-                        <!-- IMAGE PREVIEW -->
-
-                        <div
-                            id="preview-container"
-                            class="preview-container"
-                        >
-
-                            <div class="preview-title">
-                                X-ray Preview
-                            </div>
-
+                        <div id="preview-container" class="preview-container">
+                            <div class="preview-title">X-ray Preview</div>
                             <div class="preview-image-wrapper">
-
-                                <img
-                                    id="preview-image"
-                                    class="preview-image"
-                                    alt="Selected X-ray"
-                                >
-
-                                <!-- SCAN OVERLAY -->
-
-                                <div
-                                    id="scan-overlay"
-                                    class="scan-overlay"
-                                >
-
-                                    <div
-                                        class="scan-line"
-                                    ></div>
-
-                                    <div
-                                        class="magnifier"
-                                    ></div>
-
-                                    <div
-                                        class="scan-text"
-                                    >
-                                        Analysing X-ray...
-                                    </div>
-
+                                <img id="preview-image" class="preview-image" alt="Selected X-ray">
+                                <div id="scan-overlay" class="scan-overlay">
+                                    <div class="scan-line"></div>
+                                    <div class="magnifier"></div>
+                                    <div class="scan-text">Analysing X-ray...</div>
                                 </div>
-
                             </div>
-
                         </div>
-
-
                         <div class="upload-actions">
-
-                            <button
-                                type="submit"
-                                id="analyse-button"
-                                class="primary-button"
-                                disabled
-                            >
-                                Analyse X-ray
-                            </button>
-
+                            <button type="submit" id="analyse-button" class="primary-button" disabled>Analyze</button>
                         </div>
-
                     </form>
-
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- =================================================
-             HISTORY
-             ================================================= -->
-
-        <section
-            id="history"
-            class="content-section"
-        >
-
+        <!-- HISTORY -->
+        <section id="history" class="content-section">
             <div class="card">
-
-                <div class="card-title">
-                    Analysis History
-                </div>
-
-                <div class="card-description">
-
-                    All X-ray cases in the hospital
-                    clinical support database.
-
-                </div>
-
-
+                <div class="card-title">Analysis History</div>
+                <div class="card-description">All X-ray cases in the hospital clinical support database.</div>
                 <div class="table-card">
-
                     <div class="table-container">
-
                         <table>
-
                             <thead>
-
                                 <tr>
-
-                                    <th>
-                                        Case ID
-                                    </th>
-
-                                    <th>
-                                        Staff ID
-                                    </th>
-
-                                    <th>
-                                        Date
-                                    </th>
-
-                                    <th>
-                                        Status
-                                    </th>
-
-                                    <th>
-                                        Prediction
-                                    </th>
-
-                                    <th>
-                                        Confidence
-                                    </th>
-
-                                    <th>
-                                        Results
-                                    </th>
-
+                                    <th>Case ID</th><th>Staff ID</th><th>Date</th><th>Status</th><th>Prediction</th><th>Confidence</th><th>Results</th>
                                 </tr>
-
                             </thead>
-
-
                             <tbody>
-
                                 {% if cases %}
-
                                     {% for case in cases %}
-
                                         <tr>
-
+                                            <td>{{ case.case_id }}</td>
+                                            <td>{{ case.staff_id }}</td>
+                                            <td>{{ case.created_at }}</td>
+                                            <td><span class="status {{ case.status }}">{{ case.status }}</span></td>
+                                            <td>{{ case.prediction if case.prediction else "Pending" }}</td>
                                             <td>
-                                                {{ case.case_id }}
-                                            </td>
-
-                                            <td>
-                                                {{ case.staff_id }}
-                                            </td>
-
-                                            <td>
-                                                {{ case.created_at }}
-                                            </td>
-
-                                            <td>
-
-                                                <span
-                                                    class="status {{ case.status }}"
-                                                >
-                                                    {{ case.status }}
-                                                </span>
-
-                                            </td>
-
-                                            <td>
-                                                {{ case.prediction
-                                                   if case.prediction
-                                                   else "Pending" }}
-                                            </td>
-
-                                            <td>
-
                                                 {% if case.confidence is not none %}
-
-                                                    {{ "%.2f"|format(
-                                                        case.confidence
-                                                    ) }}%
-
-                                                {% else %}
-
-                                                    —
-
-                                                {% endif %}
-
+                                                    {{ "%.2f"|format(case.confidence) }}%
+                                                    {% if case.confidence < LOW_CONFIDENCE_THRESHOLD %}
+                                                        <br><span class="flag-badge">Review recommended</span>
+                                                    {% endif %}
+                                                {% else %} — {% endif %}
                                             </td>
-
-                                            <td>
-
-                                                <a
-                                                    href="{{ url_for(
-                                                        'case_details',
-                                                        case_id=case.case_id
-                                                    ) }}"
-                                                    class="view-button"
-                                                >
-                                                    View Results
-                                                </a>
-
-                                            </td>
-
+                                            <td><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view-button">View Results</a></td>
                                         </tr>
-
                                     {% endfor %}
-
                                 {% else %}
-
-                                    <tr>
-
-                                        <td
-                                            colspan="7"
-                                            class="empty-state"
-                                        >
-                                            No X-ray cases have
-                                            been created yet.
-                                        </td>
-
-                                    </tr>
-
+                                    <tr><td colspan="7" class="empty-state">No X-ray cases have been created yet.</td></tr>
                                 {% endif %}
-
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- =================================================
-             STATISTICS
-             ================================================= -->
-
-        <section
-            id="statistics"
-            class="content-section"
-        >
-
+        <!-- REPORTS (Contains Statistics & Flagged Cases) -->
+        <section id="reports" class="content-section">
+            <!-- Statistics Section -->
             <div class="card">
-
-                <div class="card-title">
-                    Statistics
-                </div>
-
-                <div class="card-description">
-
-                    Overview of all clinical
-                    X-ray cases.
-
-                </div>
-
-
+                <div class="card-title">System Statistics Overview</div>
+                <div class="card-description">Overview of all clinical X-ray cases.</div>
                 <div class="stats-grid">
-
-                    <div class="stat-card">
-
-                        <div class="stat-label">
-                            Total Cases
-                        </div>
-
-                        <div class="stat-number">
-                            {{ statistics.total_cases or 0 }}
-                        </div>
-
-                    </div>
-
-                    <div class="stat-card">
-
-                        <div class="stat-label">
-                            Analysed
-                        </div>
-
-                        <div class="stat-number">
-                            {{ statistics.analysed_cases or 0 }}
-                        </div>
-
-                    </div>
-
-                    <div class="stat-card">
-
-                        <div class="stat-label">
-                            Pending
-                        </div>
-
-                        <div class="stat-number">
-                            {{ statistics.pending_cases or 0 }}
-                        </div>
-
-                    </div>
-
-                    <div class="stat-card">
-
-                        <div class="stat-label">
-                            Failed
-                        </div>
-
-                        <div class="stat-number">
-                            {{ statistics.failed_cases or 0 }}
-                        </div>
-
-                    </div>
-
+                    <div class="stat-card"><div class="stat-label">Total Cases</div><div class="stat-number">{{ statistics.total_cases or 0 }}</div></div>
+                    <div class="stat-card"><div class="stat-label">Analysed</div><div class="stat-number">{{ statistics.analysed_cases or 0 }}</div></div>
+                    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-number">{{ statistics.pending_cases or 0 }}</div></div>
+                    <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-number">{{ statistics.failed_cases or 0 }}</div></div>
                 </div>
-
             </div>
-
-        </section>
-
-
-        <!-- =================================================
-             REPORTS
-             ================================================= -->
-
-        <section
-            id="reports"
-            class="content-section"
-        >
 
             <div class="card">
-
-                <div class="card-title">
-                    Reports
-                </div>
-
-                <div class="card-description">
-
-                    Clinical reports will be
-                    available here based on
-                    completed X-ray analyses.
-
-                </div>
-
+                <div class="card-title">Diagnosis Breakdown Graph</div>
+                <div class="card-description">Visual representation of predicted diagnoses from analysed cases.</div>
+                {% if report_data.diagnosis_counts %}
+                    <div class="chart-container"><canvas id="diagnosisChart"></canvas></div>
+                {% else %}
+                    <div class="empty-state">No analysed cases available to generate graph.</div>
+                {% endif %}
             </div>
 
+            <!-- Flagged Cases -->
+            <div class="card">
+                <div class="card-title">Flagged for Review</div>
+                <div class="card-description">Cases with confidence below {{ LOW_CONFIDENCE_THRESHOLD }}% must be reviewed by a doctor or healthcare worker before the prediction is relied upon.</div>
+                <div class="table-card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Case ID</th><th>Date</th><th>Prediction</th><th>Confidence</th><th>Results</th></tr>
+                            </thead>
+                            <tbody>
+                                {% if report_data.low_confidence_cases %}
+                                    {% for case in report_data.low_confidence_cases %}
+                                        <tr>
+                                            <td>{{ case.case_id }}</td><td>{{ case.created_at }}</td><td>{{ case.prediction }}</td>
+                                            <td>{{ "%.2f"|format(case.confidence) }}%</td>
+                                            <td><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view-button">View Results</a></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="5" class="empty-state">No flagged cases — all analysed cases meet the confidence threshold.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
-
     </main>
-
 </div>
 
+<div class="global-footer">All predictions and generated reports must be reviewed by a healthcare worker.</div>
 
 <script>
-
-    // =====================================================
-    // NAVIGATION
-    // =====================================================
-
-    function showSection(
-        sectionId,
-        button
-    ) {
-
-        const sections =
-            document.querySelectorAll(
-                ".content-section"
-            );
-
-        sections.forEach(
-            function(section) {
-
-                section.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-        const buttons =
-            document.querySelectorAll(
-                ".nav-button"
-            );
-
-        buttons.forEach(
-            function(navButton) {
-
-                navButton.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-        const selectedSection =
-            document.getElementById(
-                sectionId
-            );
-
-        if (selectedSection) {
-
-            selectedSection.classList.add(
-                "active"
-            );
-
-        }
-
-        if (button) {
-
-            button.classList.add(
-                "active"
-            );
-
-        }
-
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('closed');
+        document.getElementById('main-content').classList.toggle('expanded');
     }
 
+    // Removed Statistics from titles since it's merged into Reports
+    const pageTitles = { 'new-scan': 'New X-ray Analysis', 'history': 'Analysis History', 'reports': 'Reports & Statistics' };
+    const pageSubtitles = { 'new-scan': 'Upload and analyse a chest X-ray', 'history': 'All previous clinical cases', 'reports': 'System data and flagged cases' };
 
-    // =====================================================
-    // DASHBOARD BUTTON NAVIGATION
-    // =====================================================
-
-    function showSectionById(
-        sectionId
-    ) {
-
-        const sections =
-            document.querySelectorAll(
-                ".content-section"
-            );
-
-        sections.forEach(
-            function(section) {
-
-                section.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-        const selectedSection =
-            document.getElementById(
-                sectionId
-            );
-
-        if (selectedSection) {
-
-            selectedSection.classList.add(
-                "active"
-            );
-
+    function showSection(sectionId, button) {
+        document.querySelectorAll(".content-section").forEach(s => s.classList.remove("active"));
+        document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
+        document.getElementById(sectionId).classList.add("active");
+        if (button) button.classList.add("active");
+        if(pageTitles[sectionId]) {
+            document.getElementById('page-title').textContent = pageTitles[sectionId];
+            document.getElementById('page-subtitle').textContent = pageSubtitles[sectionId];
         }
-
-        const buttons =
-            document.querySelectorAll(
-                ".nav-button"
-            );
-
-        buttons.forEach(
-            function(button) {
-
-                button.classList.remove(
-                    "active"
-                );
-
-                const onclickValue =
-                    button.getAttribute(
-                        "onclick"
-                    );
-
-                if (
-                    onclickValue &&
-                    onclickValue.includes(
-                        sectionId
-                    )
-                ) {
-
-                    button.classList.add(
-                        "active"
-                    );
-
-                }
-
-            }
-        );
-
     }
 
-
-    // =====================================================
-    // IMAGE PREVIEW
-    // =====================================================
-
-    const xrayInput =
-        document.getElementById(
-            "xray"
-        );
-
-    const selectedFile =
-        document.getElementById(
-            "selected-file"
-        );
-
-    const previewContainer =
-        document.getElementById(
-            "preview-container"
-        );
-
-    const previewImage =
-        document.getElementById(
-            "preview-image"
-        );
-
-    const analyseButton =
-        document.getElementById(
-            "analyse-button"
-        );
-
+    const xrayInput = document.getElementById("xray");
+    const selectedFile = document.getElementById("selected-file");
+    const previewContainer = document.getElementById("preview-container");
+    const previewImage = document.getElementById("preview-image");
+    const analyseButton = document.getElementById("analyse-button");
+    const scanForm = document.getElementById("scan-form");
+    const scanOverlay = document.getElementById("scan-overlay");
 
     if (xrayInput) {
-
-        xrayInput.addEventListener(
-            "change",
-            function() {
-
-                if (
-                    this.files &&
-                    this.files.length > 0
-                ) {
-
-                    const file =
-                        this.files[0];
-
-                    selectedFile.textContent =
-                        file.name;
-
-                    const reader =
-                        new FileReader();
-
-                    reader.onload =
-                        function(event) {
-
-                            previewImage.src =
-                                event.target.result;
-
-                            previewContainer.style.display =
-                                "block";
-
-                            analyseButton.disabled =
-                                false;
-
-                        };
-
-                    reader.readAsDataURL(
-                        file
-                    );
-
-                }
-
-                else {
-
-                    selectedFile.textContent =
-                        "No file selected";
-
-                    previewContainer.style.display =
-                        "none";
-
-                    analyseButton.disabled =
-                        true;
-
-                }
-
+        xrayInput.addEventListener("change", function() {
+            if (this.files && this.files.length > 0) {
+                selectedFile.textContent = this.files[0].name;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                    previewContainer.style.display = "block";
+                    analyseButton.disabled = false;
+                };
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                selectedFile.textContent = "No file selected";
+                previewContainer.style.display = "none";
+                analyseButton.disabled = true;
             }
-        );
-
+        });
     }
-
-
-    // =====================================================
-    // START SCAN ANIMATION
-    // =====================================================
-
-    const scanForm =
-        document.getElementById(
-            "scan-form"
-        );
-
-    const scanOverlay =
-        document.getElementById(
-            "scan-overlay"
-        );
-
 
     if (scanForm) {
-
-        scanForm.addEventListener(
-            "submit",
-            function() {
-
-                if (
-                    !xrayInput.files ||
-                    xrayInput.files.length === 0
-                ) {
-
-                    return;
-
-                }
-
-                // Keep the uploaded image visible.
-
-                previewContainer.style.display =
-                    "block";
-
-                // Display scanning animation.
-
-                scanOverlay.classList.add(
-                    "active"
-                );
-
-                // Disable button to prevent
-                // duplicate submissions.
-
-                analyseButton.disabled =
-                    true;
-
-                analyseButton.textContent =
-                    "Analysing...";
-
-            }
-        );
-
+        scanForm.addEventListener("submit", function() {
+            if (!xrayInput.files || xrayInput.files.length === 0) return;
+            previewContainer.style.display = "block";
+            scanOverlay.classList.add("active");
+            analyseButton.disabled = true;
+            analyseButton.textContent = "Analyzing...";
+        });
     }
 
+    const diagnosisData = JSON.parse('{{ report_data.diagnosis_counts | tojson | safe }}');
+    if (document.getElementById('diagnosisChart') && Object.keys(diagnosisData).length > 0) {
+        const ctx = document.getElementById('diagnosisChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(diagnosisData),
+                datasets: [{
+                    label: 'Number of Cases',
+                    data: Object.values(diagnosisData),
+                    backgroundColor: ['rgba(37, 99, 235, 0.7)','rgba(16, 185, 129, 0.7)','rgba(245, 158, 11, 0.7)','rgba(239, 68, 68, 0.7)','rgba(139, 92, 246, 0.7)'],
+                    borderColor: ['rgba(37, 99, 235, 1)','rgba(16, 185, 129, 1)','rgba(245, 158, 11, 1)','rgba(239, 68, 68, 1)','rgba(139, 92, 246, 1)'],
+                    borderWidth: 1, borderRadius: 6
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
 </script>
-
-
 </body>
-
 </html>
