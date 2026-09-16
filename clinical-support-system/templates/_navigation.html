@@ -1,0 +1,36 @@
+<aside class="sidebar" id="sidebar">
+    <button class="toggle-sidebar" type="button" onclick="toggleSidebar()">☰</button>
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/hospital-logo.png') }}" alt="Hospital Logo" class="logo">
+        <div>
+            <div class="logo-text">Clinical Support</div>
+            <div class="logo-subtitle">To Assist, Not to Replace</div>
+        </div>
+    </div>
+    <nav class="navigation" aria-label="Main navigation">
+        {% if session.get('role') == 'clinical_user' %}
+            <a href="{{ url_for('clinical_dashboard') }}#new-scan" class="nav-button{% if request.endpoint == 'clinical_dashboard' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('new-scan', this); return false;"{% endif %}>New Scan</a>
+            <a href="{{ url_for('clinical_dashboard') }}#history" class="nav-button{% if request.endpoint == 'case_details' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('history', this); return false;"{% endif %}>History</a>
+            <a href="{{ url_for('clinical_dashboard') }}#reports" class="nav-button"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('reports', this); return false;"{% endif %}>Reports</a>
+        {% elif session.get('role') == 'technician' %}
+            <a href="{{ url_for('technician_dashboard') }}" class="nav-button active">Technician Dashboard</a>
+        {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+        <div class="staff-info">
+            <div class="staff-name">{{ full_name }}</div>
+            <div class="staff-id">{{ staff_id }}</div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+    </div>
+</aside>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('closed');
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.classList.toggle('expanded');
+        }
+    }
+</script>

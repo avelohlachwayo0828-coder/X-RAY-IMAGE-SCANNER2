@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinical Support System</title>
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/hospital-logo.jpg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/hospital-logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -100,14 +101,14 @@
         .chart-container { position: relative; height: 300px; width: 100%; margin-top: 15px; }
 
         /* UPLOAD AREA */
-        .upload-card { max-width: 900px; }
+        .upload-card { width: 100%; max-width: 900px; margin: 0 auto; }
         .upload-area { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 45px 25px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
         .upload-area:hover { background: #f1f5f9; border-color: #2563eb; }
         .upload-icon { width: 48px; height: 48px; color: #2563eb; margin-bottom: 15px; }
         .upload-text { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
         .upload-subtext { font-size: 12px; color: #64748b; }
         .selected-file { margin-top: 14px; min-height: 18px; font-size: 12px; color: #475467; }
-        .upload-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+        .upload-actions { display: flex; justify-content: center; margin-top: 20px; }
         .preview-container { display: none; margin-top: 25px; }
         .preview-title { font-size: 14px; font-weight: 600; color: #344054; margin-bottom: 12px; }
         .preview-image-wrapper { position: relative; width: 100%; max-width: 700px; margin: auto; background: #111827; border-radius: 10px; overflow: hidden; }
@@ -148,29 +149,7 @@
 
 <body>
 <div class="app">
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/hospital-logo.jpg') }}" alt="Hospital Logo" class="logo">
-            <div>
-                <div class="logo-text">Clinical Support</div>
-                <div class="logo-subtitle">To Assist, Not to Replace</div>
-            </div>
-        </div>
-        <nav class="navigation">
-            <button class="nav-button active" onclick="showSection('new-scan', this)">New Scan</button>
-            <button class="nav-button" onclick="showSection('history', this)">History</button>
-            <button class="nav-button" onclick="showSection('reports', this)">Reports</button>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="staff-info">
-                <div class="staff-name">{{ full_name }}</div>
-                <div class="staff-id">{{ staff_id }}</div>
-            </div>
-            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
-        </div>
-    </aside>
+    {% include '_navigation.html' %}
 
     <!-- MAIN CONTENT -->
     <main class="main" id="main-content">
@@ -330,11 +309,6 @@
 <div class="global-footer">All predictions and generated reports must be reviewed by a healthcare worker.</div>
 
 <script>
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('closed');
-        document.getElementById('main-content').classList.toggle('expanded');
-    }
-
     // Removed Statistics from titles since it's merged into Reports
     const pageTitles = { 'new-scan': 'New X-ray Analysis', 'history': 'Analysis History', 'reports': 'Reports & Statistics' };
     const pageSubtitles = { 'new-scan': 'Upload and analyse a chest X-ray', 'history': 'All previous clinical cases', 'reports': 'System data and flagged cases' };
@@ -348,6 +322,11 @@
             document.getElementById('page-title').textContent = pageTitles[sectionId];
             document.getElementById('page-subtitle').textContent = pageSubtitles[sectionId];
         }
+    }
+
+    const initialSection = window.location.hash.substring(1);
+    if (pageTitles[initialSection]) {
+        showSection(initialSection, document.querySelector(`.nav-button[href$="#${initialSection}"]`));
     }
 
     const xrayInput = document.getElementById("xray");

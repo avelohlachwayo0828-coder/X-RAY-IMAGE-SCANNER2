@@ -75,3 +75,4 @@ clinical-support-system/static/ai_results/
 Thumbs.db
 # VS Code workspace files
 *.code-workspace
+.venv/

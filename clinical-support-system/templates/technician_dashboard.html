@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Technician Dashboard</title>
-    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='images/hospital-logo.jpg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/hospital-logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -12,7 +13,8 @@
         html, body { scrollbar-width: none; -ms-overflow-style: none; }
         html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
-        body { font-family: Arial, Helvetica, sans-serif; background: #eef4f6; color: #20353d; min-height: 100vh; padding: 25px; padding-bottom: 80px; /* Space for fixed footer */ }
+        body { font-family: Arial, Helvetica, sans-serif; background: #eef4f6; color: #20353d; min-height: 100vh; overflow: hidden; }
+        .technician-main { flex: 1; min-width: 0; height: 100vh; overflow-y: auto; padding: 25px 25px 80px; }
         .dashboard { width: min(1400px, 96%); margin: auto; }
 
         .header { background: white; padding: 22px 28px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
@@ -57,13 +59,16 @@
 
         @media (max-width: 1000px) { .create-form { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 650px) {
-            body { padding: 12px; padding-bottom: 70px; }
+            .technician-main { height: auto; overflow: visible; padding: 12px 12px 70px; }
             .header { flex-direction: column; align-items: flex-start; gap: 15px; }
             .create-form { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+<div class="app">
+{% include '_navigation.html' %}
+<main class="technician-main">
 <div class="dashboard">
     <header class="header">
         <div>
@@ -145,6 +150,8 @@
             </table>
         </div>
     </section>
+</div>
+</main>
 </div>
 
 <div class="global-footer">All predictions and generated reports must be reviewed by a healthcare worker.</div>
