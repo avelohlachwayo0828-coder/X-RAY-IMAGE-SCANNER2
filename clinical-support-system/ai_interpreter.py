@@ -10,7 +10,7 @@ load_dotenv()
 from groq import Groq
 
 API_KEY = os.environ.get("GROQ_API_KEY")
-VISION_MODEL_NAME = "qwen/qwen3.6-27b"
+VISION_MODEL_NAME = "qwen/qwen3.8-27b"  # fixed: was "qwen/qwen3.6-27b" (doesn't exist)
 
 SAFE_FALLBACK = """
 Image explanation is temporarily unavailable.
@@ -123,5 +123,5 @@ def interpret_chest_xray(image):
                 return SAFE_FALLBACK
 
     except Exception as e:
-        print("Groq error:", e)
+        print("Groq error:", e)  # <-- watch this in your terminal/console when you run it
         return SAFE_FALLBACK

@@ -1,3 +1,5 @@
+import json
+
 from pathlib import Path
 
 import torch
@@ -21,17 +23,26 @@ MODEL_PATH = (
     / "resnet50_final.pth"
 )
 
+DEPLOYMENT_CONFIG_PATH = (
+    PROJECT_DIR
+    / "deployment_config.json"
+)
+
 
 # ============================================================
 # CLASSES
 # ============================================================
+# Read from deployment_config.json (written by the training
+# notebook as sorted(train_df['label'].unique())) instead of
+# hardcoding, so this can never silently drift out of sync
+# with what the model was actually trained on.
 
-CLASS_NAMES = [
-    "COVID19",
-    "NORMAL",
-    "PNEUMONIA",
-    "TB",
-]
+with open(DEPLOYMENT_CONFIG_PATH) as f:
+
+    _deployment_config = json.load(f)
+
+
+CLASS_NAMES = _deployment_config["classes"]
 
 
 # ============================================================
@@ -39,6 +50,17 @@ CLASS_NAMES = [
 # ============================================================
 
 IMAGE_SIZE = 224
+
+
+# ============================================================
+# BORDER CROP FRACTION
+# ============================================================
+# Must match margin_frac used in training exactly.
+
+CROP_MARGIN_FRAC = _deployment_config.get(
+    "crop_margin_frac",
+    0.05
+)
 
 
 # ============================================================
@@ -53,74 +75,35 @@ DEVICE = torch.device(
 
 
 # ============================================================
-# IMAGE PREPROCESSING
+# BORDER CROP
 # ============================================================
+# Exact same crop applied during training/evaluation. This
+# removes a fixed-fraction margin from each edge before the
+# image is resized, so the model sees the same framing in
+# production that it saw during training.
 
-class ResizeWithPad:
+def crop_margin(image, margin_frac=CROP_MARGIN_FRAC):
 
-    def __init__(self, size):
+    width, height = image.size
 
-        self.size = size
+    left = int(width * margin_frac)
+    top = int(height * margin_frac)
+    right = int(width * (1 - margin_frac))
+    bottom = int(height * (1 - margin_frac))
 
-
-    def __call__(self, image):
-
-        width, height = image.size
-
-        scale = min(
-            self.size / width,
-            self.size / height
-        )
-
-        new_width = max(
-            1,
-            round(width * scale)
-        )
-
-        new_height = max(
-            1,
-            round(height * scale)
-        )
-
-        image = image.resize(
-            (
-                new_width,
-                new_height
-            ),
-            Image.Resampling.BILINEAR
-        )
-
-        padded = Image.new(
-            "RGB",
-            (
-                self.size,
-                self.size
-            ),
-            (0, 0, 0)
-        )
-
-        left = (
-            self.size - new_width
-        ) // 2
-
-        top = (
-            self.size - new_height
-        ) // 2
-
-        padded.paste(
-            image,
-            (
-                left,
-                top
-            )
-        )
-
-        return padded
+    return image.crop(
+        (left, top, right, bottom)
+    )
 
 
 # ============================================================
 # EXACT TRAINING / EVALUATION PREPROCESSING
 # ============================================================
+# NOTE: training resized directly to (IMAGE_SIZE, IMAGE_SIZE)
+# after the border crop -- it does NOT preserve aspect ratio
+# and pad. Do not reintroduce aspect-preserving padding here;
+# it would feed the model a differently-shaped input than the
+# one it was trained and evaluated on.
 
 transform = transforms.Compose([
 
@@ -129,8 +112,13 @@ transform = transforms.Compose([
         image.convert("RGB")
     ),
 
-    ResizeWithPad(
-        IMAGE_SIZE
+    transforms.Lambda(
+        lambda image:
+        crop_margin(image)
+    ),
+
+    transforms.Resize(
+        (IMAGE_SIZE, IMAGE_SIZE)
     ),
 
     transforms.ToTensor(),
@@ -163,7 +151,7 @@ def create_model():
 
     model.fc = nn.Linear(
         model.fc.in_features,
-        4
+        len(CLASS_NAMES)
     )
 
     return model
@@ -410,22 +398,21 @@ def predict_tb(image):
     # --------------------------------------------------------
     # Individual probabilities
     # --------------------------------------------------------
+    # Indexed by position in CLASS_NAMES (from
+    # deployment_config.json) rather than assumed fixed slots,
+    # so this stays correct even if the class order in the
+    # config ever changes.
 
-    covid_probability = float(
-        probabilities[0].item()
-    )
+    class_probabilities = {
 
-    normal_probability = float(
-        probabilities[1].item()
-    )
+        class_name: round(
+            float(probabilities[i].item()) * 100,
+            2
+        )
 
-    pneumonia_probability = float(
-        probabilities[2].item()
-    )
+        for i, class_name in enumerate(CLASS_NAMES)
 
-    tb_probability = float(
-        probabilities[3].item()
-    )
+    }
 
 
     # --------------------------------------------------------
@@ -477,47 +464,22 @@ def predict_tb(image):
             2
         ),
 
-        "probabilities": {
+        "probabilities": class_probabilities,
 
-            "COVID19": round(
-                covid_probability * 100,
-                2
-            ),
-
-            "NORMAL": round(
-                normal_probability * 100,
-                2
-            ),
-
-            "PNEUMONIA": round(
-                pneumonia_probability * 100,
-                2
-            ),
-
-            "TB": round(
-                tb_probability * 100,
-                2
-            )
-        },
-
-        "covid19_probability": round(
-            covid_probability * 100,
-            2
+        "covid19_probability": class_probabilities.get(
+            "COVID19"
         ),
 
-        "normal_probability": round(
-            normal_probability * 100,
-            2
+        "normal_probability": class_probabilities.get(
+            "NORMAL"
         ),
 
-        "pneumonia_probability": round(
-            pneumonia_probability * 100,
-            2
+        "pneumonia_probability": class_probabilities.get(
+            "PNEUMONIA"
         ),
 
-        "tb_probability": round(
-            tb_probability * 100,
-            2
+        "tb_probability": class_probabilities.get(
+            "TB"
         )
     }
 
@@ -545,8 +507,11 @@ def get_model_info():
         "image_size":
             IMAGE_SIZE,
 
+        "crop_margin_frac":
+            CROP_MARGIN_FRAC,
+
         "preprocessing":
-            "RGB -> ResizeWithPad(224) -> "
+            "RGB -> crop_margin(0.05) -> Resize(224x224) -> "
             "ToTensor -> ImageNet normalization"
 
     }

@@ -1,0 +1,4 @@
+{
+  "classes": ["COVID19", "NORMAL", "PNEUMONIA", "TB"],
+  "crop_margin_frac": 0.05
+}
