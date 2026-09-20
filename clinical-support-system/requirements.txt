@@ -12,7 +12,7 @@ scikit-learn==1.7.1
 
 # Image processing
 Pillow==11.3.0
-opencv-python==4.12.0.88
+opencv-python-headless==4.12.0.88
 
 # Visualization
 matplotlib==3.10.6
@@ -21,5 +21,5 @@ seaborn==0.13.2
 # Utilities
 requests==2.32.5
 
-# Gemini API integration
-google-genai==1.31.0
+# AI interpretation
+groq==1.7.0
