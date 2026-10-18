@@ -55,7 +55,7 @@ from predict import (
 
 
 from gradcam import (
-    generate_gradcam
+    generate_gradcam_with_circle
 )
 
 
@@ -630,11 +630,13 @@ def new_scan():
         )
 
         # ---------------------------------------------
-        # GRAD-CAM
+        # GRAD-CAM + CIRCLED IMAGE
         # ---------------------------------------------
 
-        heatmap = generate_gradcam(
-            image
+        heatmap, circled = (
+            generate_gradcam_with_circle(
+                image
+            )
         )
 
         gradcam_filename = (
@@ -652,6 +654,21 @@ def new_scan():
 
         heatmap_image.save(
             gradcam_path,
+            "JPEG",
+            quality=95
+        )
+
+        circled_path = (
+            UPLOAD_FOLDER
+            / f"{case_id}_circled.jpg"
+        )
+
+        circled_image = Image.fromarray(
+            circled
+        )
+
+        circled_image.save(
+            circled_path,
             "JPEG",
             quality=95
         )
@@ -828,6 +845,21 @@ def case_details(case_id):
             gemini_interpretation = None
 
     # -----------------------------------------------------
+    # CIRCLED IMAGE (only exists for newer cases)
+    # -----------------------------------------------------
+
+    circled_filename = (
+        f"{case_id}_circled.jpg"
+    )
+
+    if not (
+        UPLOAD_FOLDER
+        / circled_filename
+    ).exists():
+
+        circled_filename = None
+
+    # -----------------------------------------------------
     # RENDER CASE
     # -----------------------------------------------------
 
@@ -839,6 +871,10 @@ def case_details(case_id):
 
         gemini_interpretation=(
             gemini_interpretation
+        ),
+
+        circled_filename=(
+            circled_filename
         ),
 
         full_name=session[

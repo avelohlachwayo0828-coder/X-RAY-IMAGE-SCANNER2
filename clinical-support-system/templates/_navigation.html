@@ -9,19 +9,35 @@
     </div>
     <nav class="navigation" aria-label="Main navigation">
         {% if session.get('role') == 'clinical_user' %}
-            <a href="{{ url_for('clinical_dashboard') }}#new-scan" class="nav-button{% if request.endpoint == 'clinical_dashboard' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('new-scan', this); return false;"{% endif %}>New Scan</a>
-            <a href="{{ url_for('clinical_dashboard') }}#history" class="nav-button{% if request.endpoint == 'case_details' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('history', this); return false;"{% endif %}>History</a>
-            <a href="{{ url_for('clinical_dashboard') }}#reports" class="nav-button"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('reports', this); return false;"{% endif %}>Reports</a>
+            <a href="{{ url_for('clinical_dashboard') }}#new-scan" class="nav-button{% if request.endpoint == 'clinical_dashboard' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('new-scan', this); return false;"{% endif %}>
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                New Scan
+            </a>
+            <a href="{{ url_for('clinical_dashboard') }}#history" class="nav-button{% if request.endpoint == 'case_details' %} active{% endif %}"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('history', this); return false;"{% endif %}>
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                History
+            </a>
+            <a href="{{ url_for('clinical_dashboard') }}#reports" class="nav-button"{% if request.endpoint == 'clinical_dashboard' %} onclick="showSection('reports', this); return false;"{% endif %}>
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+                Reports
+            </a>
         {% elif session.get('role') == 'technician' %}
-            <a href="{{ url_for('technician_dashboard') }}" class="nav-button active">Technician Dashboard</a>
+            <a href="{{ url_for('technician_dashboard') }}" class="nav-button active">
+                <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Technician Dashboard
+            </a>
         {% endif %}
     </nav>
     <div class="sidebar-footer">
         <div class="staff-info">
-            <div class="staff-name">{{ full_name }}</div>
-            <div class="staff-id">{{ staff_id }}</div>
+            {% set name_parts = (full_name or '').split() %}
+            <div class="avatar">{% if name_parts|length > 1 %}{{ (name_parts[0][0] ~ name_parts[1][0])|upper }}{% elif name_parts %}{{ name_parts[0][:2]|upper }}{% else %}?{% endif %}</div>
+            <div class="staff-text">
+                <div class="staff-name">{{ full_name }}</div>
+                <div class="staff-id">{{ staff_id }}</div>
+            </div>
         </div>
-        <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+        <a href="{{ url_for('logout') }}" class="logout-button">Log out</a>
     </div>
 </aside>
 

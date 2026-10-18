@@ -6,112 +6,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinical Support System</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/hospital-logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Fraunces:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        :root {
+            --serif: "Fraunces", Georgia, "Times New Roman", serif;
+            --sans: "IBM Plex Sans", "Segoe UI", system-ui, Arial, sans-serif;
+            --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+            --ink: #0F1B2D;
+            --text: #43536B;
+            --muted: #5A6B82;
+            --line: #E1E7EE;
+            --blue: #2563EB;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         /* Hide Scrollbars */
         html, body, .main, .sidebar { scrollbar-width: none; -ms-overflow-style: none; }
         html::-webkit-scrollbar, body::-webkit-scrollbar, .main::-webkit-scrollbar, .sidebar::-webkit-scrollbar { display: none; }
 
-        html, body { width: 100%; height: 100%; font-family: Arial, Helvetica, sans-serif; background: #f4f7fb; color: #1f2937; overflow: hidden; }
-        .app { width: 100vw; height: 100vh; display: flex; overflow: hidden; position: relative; }
-
-        /* SIDEBAR */
-        .sidebar { 
-            width: 260px; 
-            min-width: 260px; 
-            height: 100vh; 
-            background: #ffffff; 
-            border-right: 1px solid #e5e7eb; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 22px 16px 70px 16px; 
-            transition: transform 0.3s ease; 
-            z-index: 100; 
-        }
-        .sidebar.closed { transform: translateX(-100%); position: absolute; }
-        
-        .toggle-sidebar { position: absolute; right: -40px; top: 20px; background: #2563eb; color: white; border: none; border-radius: 0 8px 8px 0; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; z-index: 101; }
-        .sidebar.closed .toggle-sidebar { position: fixed; left: 0; top: 20px; border-radius: 0 8px 8px 0; }
-
-        .logo-container { display: flex; align-items: center; gap: 12px; padding: 4px 8px 24px 8px; border-bottom: 1px solid #edf0f4; }
-        .logo { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; }
-        .logo-text { font-size: 17px; font-weight: 700; color: #172033; line-height: 1.2; }
-        .logo-subtitle { margin-top: 3px; font-size: 11px; color: #7b8494; font-style: italic; }
-
-        .navigation { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; }
-        
-        .nav-button { width: 100%; border: none; background: transparent; padding: 13px 14px; border-radius: 9px; text-align: left; font-size: 14px; font-weight: 500; color: #596273; cursor: pointer; transition: all 0.2s ease; }
-        .nav-button:hover { background: #f1f5f9; color: #172033; }
-        .nav-button.active { background: #eaf2ff; color: #2563eb; font-weight: 600; }
-
-        .sidebar-footer { margin-top: auto; padding-top: 10px; }
-        .staff-info { padding: 10px 8px 14px 8px; }
-        .staff-name { font-size: 13px; font-weight: 600; color: #202938; }
-        .staff-id { margin-top: 4px; font-size: 11px; color: #7b8494; }
-        .logout-button { display: block; width: 100%; padding: 11px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; color: #b42318; background: #fff3f2; transition: background 0.2s; }
-        .logout-button:hover { background: #fee4e2; }
+        html, body { width: 100%; height: 100%; font-family: var(--sans); background: #F3F5F8; color: var(--ink); overflow: hidden; }
 
         /* MAIN */
-        .main { flex: 1; height: 100vh; min-width: 0; overflow-y: auto; padding: 28px 34px 80px 34px; transition: margin-left 0.3s ease; }
+        .main { flex: 1; height: 100vh; min-width: 0; overflow-y: auto; padding: 36px 48px 84px 48px; transition: margin-left 0.3s ease; }
         .main.expanded { margin-left: 0; }
+        .page { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-        .page-title { font-size: 25px; font-weight: 700; color: #172033; }
-        .page-subtitle { margin-top: 5px; font-size: 13px; color: #778195; }
-        .user-badge { background: #ffffff; border: 1px solid #e4e8ef; padding: 9px 14px; border-radius: 9px; font-size: 12px; color: #596273; }
+        .topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+        .page-title { font-family: var(--serif); font-weight: 600; font-size: 36px; letter-spacing: -0.01em; color: var(--ink); }
+        .page-subtitle { margin-top: 4px; font-size: 15px; color: var(--muted); }
+        .user-badge { background: #ffffff; border: 1px solid var(--line); border-radius: 99px; padding: 8px 16px; font-size: 13px; color: var(--text); }
 
         /* MESSAGES & SECTIONS */
-        .messages { margin-bottom: 20px; }
-        .message { padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
-        .message.success { background: #ecfdf3; color: #067647; border: 1px solid #abefc6; }
-        .message.error { background: #fef3f2; color: #b42318; border: 1px solid #fecdca; }
+        .message { padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; }
+        .message.success { background: #E2F4EA; color: #14693A; border: 1px solid #B7E2C8; }
+        .message.error { background: #FDECEA; color: #9B2C1F; border: 1px solid #F0CFC9; }
         .content-section { display: none; }
-        .content-section.active { display: block; }
+        .content-section.active { display: flex; flex-direction: column; gap: 24px; }
 
-        /* CARDS & TABLES */
-        .card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; padding: 22px; margin-bottom: 20px; }
-        .card-title { font-size: 17px; font-weight: 700; color: #172033; margin-bottom: 7px; }
-        .card-description { font-size: 13px; color: #7b8494; line-height: 1.5; margin-bottom: 20px; }
-        .primary-button { border: none; background: #2563eb; color: #ffffff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .primary-button:hover { background: #1d4ed8; }
+        /* CARDS */
+        .card { background: #ffffff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+        .card h2 { font-size: 18px; font-weight: 700; color: var(--ink); }
+        .card-sub { font-size: 14px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
 
-        .table-card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; overflow: hidden; }
-        .table-container { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 850px; }
-        th { background: #f8fafc; text-align: left; padding: 14px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #7b8494; border-bottom: 1px solid #e5e9f0; }
-        td { padding: 15px 16px; font-size: 13px; color: #344054; border-bottom: 1px solid #edf0f4; }
-        .status { display: inline-block; padding: 5px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
-        .status.pending { background: #fff7ed; color: #c2410c; }
-        .status.analysed { background: #ecfdf3; color: #067647; }
-        .status.failed { background: #fef3f2; color: #b42318; }
-        .view-button { display: inline-block; padding: 7px 11px; border-radius: 7px; background: #eaf2ff; color: #2563eb; text-decoration: none; font-size: 12px; font-weight: 600; }
-        .view-button:hover { background: #dbeafe; }
-        .empty-state { padding: 50px 20px; text-align: center; color: #7b8494; font-size: 13px; }
-        .flag-badge { display: inline-block; margin-top: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .btn-primary { height: 48px; padding: 0 40px; border: 1px solid var(--blue); border-radius: 10px; background: var(--blue); color: #ffffff; font: 500 15px var(--sans); cursor: pointer; }
+        .btn-primary:hover { background: #1E40AF; border-color: #1E40AF; }
+        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-primary:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
-        /* STATS & CHARTS */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: #ffffff; border: 1px solid #e5e9f0; border-radius: 12px; padding: 20px; }
-        .stat-label { font-size: 12px; color: #7b8494; margin-bottom: 10px; }
-        .stat-number { font-size: 28px; font-weight: 700; color: #172033; }
-        .chart-container { position: relative; height: 300px; width: 100%; margin-top: 15px; }
+        /* UPLOAD */
+        .upload-form { display: flex; flex-direction: column; gap: 24px; }
+        .drop { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 48px 24px; border: 2px dashed #B8C4D6; border-radius: 16px; background: #F8FAFD; cursor: pointer; text-align: center; }
+        .drop:hover { border-color: var(--blue); background: #F1F6FE; }
+        .drop:focus-within { outline: 3px solid var(--blue); outline-offset: 2px; }
+        .sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+        .drop-icon { width: 64px; height: 64px; border-radius: 50%; background: #E6EEFD; color: var(--blue); display: flex; align-items: center; justify-content: center; }
+        .drop-title { font-size: 18px; font-weight: 600; }
+        .drop-sub { font-size: 14px; color: var(--text); }
+        .drop-file { margin-top: 4px; font-size: 13px; color: var(--muted); }
+        .upload-actions { display: flex; justify-content: center; }
 
-        /* UPLOAD AREA */
-        .upload-card { width: 100%; max-width: 900px; margin: 0 auto; }
-        .upload-area { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 45px 25px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
-        .upload-area:hover { background: #f1f5f9; border-color: #2563eb; }
-        .upload-icon { width: 48px; height: 48px; color: #2563eb; margin-bottom: 15px; }
-        .upload-text { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
-        .upload-subtext { font-size: 12px; color: #64748b; }
-        .selected-file { margin-top: 14px; min-height: 18px; font-size: 12px; color: #475467; }
-        .upload-actions { display: flex; justify-content: center; margin-top: 20px; }
-        .preview-container { display: none; margin-top: 25px; }
-        .preview-title { font-size: 14px; font-weight: 600; color: #344054; margin-bottom: 12px; }
-        .preview-image-wrapper { position: relative; width: 100%; max-width: 700px; margin: auto; background: #111827; border-radius: 10px; overflow: hidden; }
+        .preview-container { display: none; }
+        .preview-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+        .preview-image-wrapper { position: relative; width: 100%; max-width: 700px; margin: auto; background: #111827; border-radius: 12px; overflow: hidden; }
         .preview-image { display: block; width: 100%; max-height: 520px; object-fit: contain; background: #111827; }
         .scan-overlay { position: absolute; inset: 0; display: none; background: rgba(15, 23, 42, 0.25); pointer-events: none; }
         .scan-overlay.active { display: block; }
@@ -122,27 +83,107 @@
         @keyframes magnifierMove { 0% { left: 12%; top: 10%; } 25% { left: 68%; top: 20%; } 50% { left: 55%; top: 65%; } 75% { left: 18%; top: 72%; } 100% { left: 12%; top: 10%; } }
         .scan-text { position: absolute; left: 50%; bottom: 25px; transform: translateX(-50%); background: rgba(15, 23, 42, 0.88); color: #ffffff; padding: 10px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; }
 
+        /* TABLES */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+        .tbl { width: 100%; border-collapse: collapse; min-width: 820px; font-size: 14px; }
+        .tbl th { text-align: left; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 12px 20px; background: #F6F8FB; white-space: nowrap; }
+        .tbl td { padding: 14px 20px; border-top: 1px solid #EDF1F5; white-space: nowrap; }
+        .tbl tr:hover td { background: #FAFBFD; }
+        .tbl td.empty-state { white-space: normal; padding: 44px 20px; text-align: center; color: var(--muted); }
+        .case-id { font: 500 13px var(--mono); }
+        .conf { font-weight: 600; }
+        .view { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 8px; background: #E6EEFD; color: #1E40AF; font-weight: 600; font-size: 13px; text-decoration: none; }
+        .view:hover { background: #D5E3FB; }
+        .view:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+        .chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+        .chip.analysed { background: #E2F4EA; color: #14693A; }
+        .chip.pending, .chip.rv { background: #FFF1D6; color: #7A4200; }
+        .chip.failed { background: #FDECEA; color: #9B2C1F; }
+        .chip.rv { margin-left: 10px; }
+
+        .mini-conf { display: inline-flex; align-items: center; gap: 10px; }
+        .mini-track { width: 80px; height: 6px; border-radius: 3px; background: #EDF1F5; overflow: hidden; }
+        .mini-fill { display: block; height: 100%; background: #D99A1E; }
+
+        /* STATS */
+        .stats { display: flex; flex-wrap: wrap; gap: 16px; }
+        .stat { flex: 1 1 200px; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+        .stat-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .stat-number { font-family: var(--serif); font-weight: 600; font-size: 36px; margin-top: 6px; }
+
+        /* DIAGNOSIS CHART */
+        .chart { display: flex; gap: 12px; }
+        .chart-y { display: flex; flex-direction: column-reverse; justify-content: space-between; height: 260px; width: 32px; font-size: 12px; color: var(--muted); text-align: right; }
+        .chart-body { flex: 1; min-width: 0; }
+        .chart-plot { height: 260px; display: flex; align-items: flex-end; border-bottom: 1px solid #C9D3DF; background: repeating-linear-gradient(to top, #EDF1F5 0, #EDF1F5 1px, transparent 1px, transparent 25%); }
+        .bar-col { flex: 1; height: 100%; display: flex; justify-content: center; align-items: flex-end; }
+        .bar { position: relative; width: 64%; border-radius: 8px 8px 0 0; }
+        .bar-value { position: absolute; bottom: 100%; left: 0; right: 0; margin-bottom: 6px; text-align: center; font-size: 14px; font-weight: 600; }
+        .chart-labels { display: flex; margin-top: 10px; }
+        .chart-labels div { flex: 1; text-align: center; font-size: 13px; color: var(--text); padding: 0 6px; }
+        .empty-note { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+
         /* FIXED GLOBAL FOOTER */
-        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 11px; color: #6b7280; padding: 12px 10px; background: #ffffff; border-top: 1px solid #e5e7eb; z-index: 9999; }
+        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 12px; color: var(--text); padding: 12px 16px; background: #ffffff; border-top: 1px solid var(--line); z-index: 9999; }
 
         /* RESPONSIVE */
         @media (max-width: 1100px) {
-            .sidebar { width: 220px; min-width: 220px; }
-            .main { padding: 24px; padding-bottom: 80px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main { padding: 28px 24px 84px; }
         }
-        @media (max-width: 750px) {
-            body { overflow: auto; }
-            .app { min-height: 100vh; height: auto; flex-direction: column; }
-            .sidebar { width: 100%; min-width: 0; height: auto; border-right: none; border-bottom: 1px solid #e5e7eb; padding: 14px 14px 80px 14px; transform: none !important; }
-            .sidebar.closed { display: none; }
-            .toggle-sidebar { position: fixed; right: 20px; top: 20px; border-radius: 8px; }
-            .navigation { flex-direction: row; overflow-x: auto; margin-top: 12px; }
-            .nav-button { white-space: nowrap; width: auto; }
-            .sidebar-footer { display: none; }
-            .main { height: auto; overflow: visible; padding: 20px; padding-bottom: 80px; }
-            .topbar { align-items: flex-start; gap: 15px; flex-direction: column; }
-            .stats-grid { grid-template-columns: 1fr; }
+
+        @media (max-width: 900px) {
+            html, body { height: auto; overflow: auto; }
+            .main { height: auto; overflow: visible; padding: 20px 20px 96px; }
+            .page-title { font-size: 30px; }
+            .topbar { align-items: flex-start; }
+        }
+
+        @media (max-width: 700px) {
+            .page, .content-section.active { gap: 16px; }
+            .card { padding: 16px; gap: 16px; }
+
+            /* tables become stacked cards so nothing is hidden off-screen */
+            .table-wrap { overflow: visible; border: 0; border-radius: 0; }
+            .tbl, .tbl tbody, .tbl tr { display: block; width: 100%; min-width: 0; }
+            .tbl thead { display: none; }
+            .tbl tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden; background: #ffffff; }
+            .tbl tr:last-child { margin-bottom: 0; }
+            .tbl td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid #EDF1F5; white-space: normal; overflow-wrap: anywhere; text-align: right; }
+            .tbl td:first-child { border-top: 0; }
+            .tbl td::before { content: attr(data-label); flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: left; }
+            .tbl td.empty-state { display: block; text-align: center; }
+            .tbl td.empty-state::before { content: none; }
+            .tbl tr:hover td { background: transparent; }
+            .cell-val { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; }
+            .chip.rv { margin-left: 0; }
+            .view { height: 34px; }
+
+            /* statistics in a 2 x 2 grid */
+            .stat { flex: 1 1 calc(50% - 8px); padding: 14px 16px; }
+            .stat-number { font-size: 30px; }
+
+            /* upload */
+            .drop { padding: 32px 16px; }
+            .drop-icon { width: 52px; height: 52px; }
+            .drop-title { font-size: 16px; }
+            .btn-primary { width: 100%; padding: 0 20px; }
+            .preview-image { max-height: 360px; }
+
+            /* diagnosis chart scrolls sideways instead of squashing labels */
+            .chart { overflow-x: auto; padding-top: 22px; }
+            .chart-y { position: sticky; left: 0; z-index: 1; background: #ffffff; }
+            .chart-body { flex: 1 0 auto; min-width: calc(var(--n, 4) * 96px); }
+            .chart-labels div { font-size: 12px; padding: 0 4px; }
+        }
+
+        @media (max-width: 480px) {
+            .main { padding: 16px 14px 96px; }
+            .page-title { font-size: 26px; }
+            .page-subtitle { font-size: 14px; }
+            .user-badge { font-size: 12px; }
+            .global-footer { font-size: 11px; padding: 10px 12px; }
         }
     </style>
 </head>
@@ -153,13 +194,14 @@
 
     <!-- MAIN CONTENT -->
     <main class="main" id="main-content">
-        <div class="topbar">
+      <div class="page">
+        <header class="topbar">
             <div>
                 <h1 class="page-title" id="page-title">New X-ray Analysis</h1>
                 <p class="page-subtitle" id="page-subtitle">AI-Based Clinical Support System</p>
             </div>
             <div class="user-badge">{{ full_name }} | {{ staff_id }}</div>
-        </div>
+        </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -174,151 +216,181 @@
         <!-- NEW SCAN -->
         <section id="new-scan" class="content-section active">
             <div class="card">
-                <div class="card-title">New X-ray Analysis</div>
-                <div class="card-description">Select a single chest X-ray image. The image will be analysed by the clinical support model and a Grad-CAM heatmap will be generated.</div>
-                <div class="upload-card">
-                    <form id="scan-form" action="{{ url_for('new_scan') }}" method="POST" enctype="multipart/form-data">
-                        <div class="upload-area" onclick="document.getElementById('xray').click()">
-                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"></path>
-                                <path d="M12 12v9"></path>
-                                <path d="M8 17l4-4 4 4"></path>
-                            </svg>
-                            <p class="upload-text">Click to upload a chest X-ray</p>
-                            <p class="upload-subtext">Supported formats: JPG, JPEG, PNG</p>
-                            <input type="file" id="xray" name="xray" accept=".jpg,.jpeg,.png" required hidden>
-                            <p id="selected-file" class="selected-file">No file selected</p>
-                        </div>
-                        <div id="preview-container" class="preview-container">
-                            <div class="preview-title">X-ray Preview</div>
-                            <div class="preview-image-wrapper">
-                                <img id="preview-image" class="preview-image" alt="Selected X-ray">
-                                <div id="scan-overlay" class="scan-overlay">
-                                    <div class="scan-line"></div>
-                                    <div class="magnifier"></div>
-                                    <div class="scan-text">Analysing X-ray...</div>
-                                </div>
+                <div>
+                    <h2>New X-ray analysis</h2>
+                    <div class="card-sub">Select a single chest X-ray image. The image will be analysed by the clinical support model and a Grad-CAM heatmap will be generated.</div>
+                </div>
+                <form id="scan-form" class="upload-form" action="{{ url_for('new_scan') }}" method="POST" enctype="multipart/form-data">
+                    <label class="drop" for="xray">
+                        <input class="sr" type="file" id="xray" name="xray" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required>
+                        <span class="drop-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a5 5 0 01-.5-9.97A6 6 0 0118 9.5 4 4 0 0117 18M12 12v8M9 15l3-3 3 3"/></svg>
+                        </span>
+                        <span class="drop-title">Click to upload a chest X-ray</span>
+                        <span class="drop-sub">Supported formats: JPG, JPEG, PNG</span>
+                        <span class="drop-file" id="selected-file" aria-live="polite">No file selected</span>
+                    </label>
+                    <div id="preview-container" class="preview-container">
+                        <div class="preview-title">X-ray preview</div>
+                        <div class="preview-image-wrapper">
+                            <img id="preview-image" class="preview-image" alt="Selected X-ray">
+                            <div id="scan-overlay" class="scan-overlay">
+                                <div class="scan-line"></div>
+                                <div class="magnifier"></div>
+                                <div class="scan-text">Analysing X-ray...</div>
                             </div>
                         </div>
-                        <div class="upload-actions">
-                            <button type="submit" id="analyse-button" class="primary-button" disabled>Analyze</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="upload-actions">
+                        <button type="submit" id="analyse-button" class="btn-primary" disabled>Analyse X-ray</button>
+                    </div>
+                </form>
             </div>
         </section>
 
         <!-- HISTORY -->
         <section id="history" class="content-section">
             <div class="card">
-                <div class="card-title">Analysis History</div>
-                <div class="card-description">All X-ray cases in the hospital clinical support database.</div>
-                <div class="table-card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Case ID</th><th>Staff ID</th><th>Date</th><th>Status</th><th>Prediction</th><th>Confidence</th><th>Results</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if cases %}
-                                    {% for case in cases %}
-                                        <tr>
-                                            <td>{{ case.case_id }}</td>
-                                            <td>{{ case.staff_id }}</td>
-                                            <td>{{ case.created_at }}</td>
-                                            <td><span class="status {{ case.status }}">{{ case.status }}</span></td>
-                                            <td>{{ case.prediction if case.prediction else "Pending" }}</td>
-                                            <td>
-                                                {% if case.confidence is not none %}
-                                                    {{ "%.2f"|format(case.confidence) }}%
-                                                    {% if case.confidence < LOW_CONFIDENCE_THRESHOLD %}
-                                                        <br><span class="flag-badge">Review recommended</span>
-                                                    {% endif %}
-                                                {% else %} — {% endif %}
-                                            </td>
-                                            <td><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view-button">View Results</a></td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr><td colspan="7" class="empty-state">No X-ray cases have been created yet.</td></tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div>
+                    <h2>Analysis history</h2>
+                    <div class="card-sub">All X-ray cases in the hospital clinical support database.</div>
+                </div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th><th>Staff ID</th><th>Date</th><th>Status</th><th>Prediction</th><th>Confidence</th><th>Results</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if cases %}
+                                {% for case in cases %}
+                                    <tr>
+                                        <td class="case-id" data-label="Case ID">{{ case.case_id }}</td>
+                                        <td data-label="Staff ID">{{ case.staff_id }}</td>
+                                        <td data-label="Date">{{ case.created_at }}</td>
+                                        <td data-label="Status"><span class="chip {{ case.status }}">{{ case.status|capitalize }}</span></td>
+                                        <td data-label="Prediction">{{ case.prediction if case.prediction else "Pending" }}</td>
+                                        <td data-label="Confidence">
+                                            <span class="cell-val">{% if case.confidence is not none %}
+                                                <span class="conf">{{ "%.2f"|format(case.confidence) }}%</span>
+                                                {% if case.confidence < LOW_CONFIDENCE_THRESHOLD %}
+                                                    <span class="chip rv">Review recommended</span>
+                                                {% endif %}
+                                            {% else %}—{% endif %}</span>
+                                        </td>
+                                        <td data-label="Results"><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view">View results</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="7" class="empty-state">No X-ray cases have been created yet.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
-        <!-- REPORTS (Contains Statistics & Flagged Cases) -->
+        <!-- REPORTS (Statistics, Diagnosis Breakdown & Flagged Cases) -->
         <section id="reports" class="content-section">
-            <!-- Statistics Section -->
             <div class="card">
-                <div class="card-title">System Statistics Overview</div>
-                <div class="card-description">Overview of all clinical X-ray cases.</div>
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-label">Total Cases</div><div class="stat-number">{{ statistics.total_cases or 0 }}</div></div>
-                    <div class="stat-card"><div class="stat-label">Analysed</div><div class="stat-number">{{ statistics.analysed_cases or 0 }}</div></div>
-                    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-number">{{ statistics.pending_cases or 0 }}</div></div>
-                    <div class="stat-card"><div class="stat-label">Failed</div><div class="stat-number">{{ statistics.failed_cases or 0 }}</div></div>
+                <div>
+                    <h2>System statistics overview</h2>
+                    <div class="card-sub">Overview of all clinical X-ray cases.</div>
+                </div>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label"><span class="dot" style="background:#2563EB"></span>Total cases</div><div class="stat-number">{{ statistics.total_cases or 0 }}</div></div>
+                    <div class="stat"><div class="stat-label"><span class="dot" style="background:#14693A"></span>Analysed</div><div class="stat-number">{{ statistics.analysed_cases or 0 }}</div></div>
+                    <div class="stat"><div class="stat-label"><span class="dot" style="background:#B26A00"></span>Pending</div><div class="stat-number">{{ statistics.pending_cases or 0 }}</div></div>
+                    <div class="stat"><div class="stat-label"><span class="dot" style="background:#B42318"></span>Failed</div><div class="stat-number">{{ statistics.failed_cases or 0 }}</div></div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title">Diagnosis Breakdown Graph</div>
-                <div class="card-description">Visual representation of predicted diagnoses from analysed cases.</div>
-                {% if report_data.diagnosis_counts %}
-                    <div class="chart-container"><canvas id="diagnosisChart"></canvas></div>
+                <div>
+                    <h2>Diagnosis breakdown</h2>
+                    <div class="card-sub">Number of analysed cases by predicted diagnosis.</div>
+                </div>
+                {% set counts = report_data.diagnosis_counts %}
+                {% if counts %}
+                    {% set palette = ['#2563EB', '#2E9E7A', '#D99A1E', '#D9534F', '#7C5CC4'] %}
+                    {% set max_count = counts.values()|max %}
+                    {% set step = [((max_count / 4)|round(0, 'ceil')|int), 1]|max %}
+                    {% set axis_max = step * 4 %}
+                    <div class="chart">
+                        <div class="chart-y">
+                            {% for i in range(5) %}<span>{{ i * step }}</span>{% endfor %}
+                        </div>
+                        <div class="chart-body" style="--n: {{ counts|length }};">
+                            <div class="chart-plot">
+                                {% for label, count in counts.items() %}
+                                    <div class="bar-col">
+                                        <div class="bar" style="height: {{ '%.1f'|format(count / axis_max * 100) }}%; background: {{ palette[loop.index0 % palette|length] }};">
+                                            <span class="bar-value">{{ count }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="chart-labels">
+                                {% for label in counts.keys() %}<div>{{ label }}</div>{% endfor %}
+                            </div>
+                        </div>
+                    </div>
                 {% else %}
-                    <div class="empty-state">No analysed cases available to generate graph.</div>
+                    <div class="empty-note">No analysed cases available to generate graph.</div>
                 {% endif %}
             </div>
 
-            <!-- Flagged Cases -->
             <div class="card">
-                <div class="card-title">Flagged for Review</div>
-                <div class="card-description">Cases with confidence below {{ LOW_CONFIDENCE_THRESHOLD }}% must be reviewed by a doctor or healthcare worker before the prediction is relied upon.</div>
-                <div class="table-card">
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Case ID</th><th>Date</th><th>Prediction</th><th>Confidence</th><th>Results</th></tr>
-                            </thead>
-                            <tbody>
-                                {% if report_data.low_confidence_cases %}
-                                    {% for case in report_data.low_confidence_cases %}
-                                        <tr>
-                                            <td>{{ case.case_id }}</td><td>{{ case.created_at }}</td><td>{{ case.prediction }}</td>
-                                            <td>{{ "%.2f"|format(case.confidence) }}%</td>
-                                            <td><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view-button">View Results</a></td>
-                                        </tr>
-                                    {% endfor %}
-                                {% else %}
-                                    <tr><td colspan="5" class="empty-state">No flagged cases — all analysed cases meet the confidence threshold.</td></tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div>
+                    <h2>Flagged for review</h2>
+                    <div class="card-sub">Cases with confidence below {{ LOW_CONFIDENCE_THRESHOLD }}% must be reviewed by a doctor or healthcare worker before the prediction is relied upon.</div>
+                </div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead>
+                            <tr><th>Case ID</th><th>Date</th><th>Prediction</th><th>Confidence</th><th>Results</th></tr>
+                        </thead>
+                        <tbody>
+                            {% if report_data.low_confidence_cases %}
+                                {% for case in report_data.low_confidence_cases %}
+                                    <tr>
+                                        <td class="case-id" data-label="Case ID">{{ case.case_id }}</td>
+                                        <td data-label="Date">{{ case.created_at }}</td>
+                                        <td data-label="Prediction">{{ case.prediction }}</td>
+                                        <td data-label="Confidence">
+                                            <span class="mini-conf">
+                                                <span class="mini-track"><span class="mini-fill" style="width: {{ '%.2f'|format([case.confidence, 100]|min) }}%;"></span></span>
+                                                <span class="conf">{{ "%.2f"|format(case.confidence) }}%</span>
+                                            </span>
+                                        </td>
+                                        <td data-label="Results"><a href="{{ url_for('case_details', case_id=case.case_id) }}" class="view">View results</a></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="5" class="empty-state">No flagged cases — all analysed cases meet the confidence threshold.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
+      </div>
     </main>
 </div>
 
 <div class="global-footer">All predictions and generated reports must be reviewed by a healthcare worker.</div>
 
 <script>
-    // Removed Statistics from titles since it's merged into Reports
     const pageTitles = { 'new-scan': 'New X-ray Analysis', 'history': 'Analysis History', 'reports': 'Reports & Statistics' };
-    const pageSubtitles = { 'new-scan': 'Upload and analyse a chest X-ray', 'history': 'All previous clinical cases', 'reports': 'System data and flagged cases' };
+    const pageSubtitles = { 'new-scan': 'AI-Based Clinical Support System', 'history': 'All previous clinical cases', 'reports': 'System data and flagged cases' };
 
     function showSection(sectionId, button) {
         document.querySelectorAll(".content-section").forEach(s => s.classList.remove("active"));
         document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
         document.getElementById(sectionId).classList.add("active");
         if (button) button.classList.add("active");
-        if(pageTitles[sectionId]) {
+        if (pageTitles[sectionId]) {
             document.getElementById('page-title').textContent = pageTitles[sectionId];
             document.getElementById('page-subtitle').textContent = pageSubtitles[sectionId];
         }
@@ -338,11 +410,11 @@
     const scanOverlay = document.getElementById("scan-overlay");
 
     if (xrayInput) {
-        xrayInput.addEventListener("change", function() {
+        xrayInput.addEventListener("change", function () {
             if (this.files && this.files.length > 0) {
                 selectedFile.textContent = this.files[0].name;
                 const reader = new FileReader();
-                reader.onload = function(event) {
+                reader.onload = function (event) {
                     previewImage.src = event.target.result;
                     previewContainer.style.display = "block";
                     analyseButton.disabled = false;
@@ -357,31 +429,12 @@
     }
 
     if (scanForm) {
-        scanForm.addEventListener("submit", function() {
+        scanForm.addEventListener("submit", function () {
             if (!xrayInput.files || xrayInput.files.length === 0) return;
             previewContainer.style.display = "block";
             scanOverlay.classList.add("active");
             analyseButton.disabled = true;
-            analyseButton.textContent = "Analyzing...";
-        });
-    }
-
-    const diagnosisData = JSON.parse('{{ report_data.diagnosis_counts | tojson | safe }}');
-    if (document.getElementById('diagnosisChart') && Object.keys(diagnosisData).length > 0) {
-        const ctx = document.getElementById('diagnosisChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(diagnosisData),
-                datasets: [{
-                    label: 'Number of Cases',
-                    data: Object.values(diagnosisData),
-                    backgroundColor: ['rgba(37, 99, 235, 0.7)','rgba(16, 185, 129, 0.7)','rgba(245, 158, 11, 0.7)','rgba(239, 68, 68, 0.7)','rgba(139, 92, 246, 0.7)'],
-                    borderColor: ['rgba(37, 99, 235, 1)','rgba(16, 185, 129, 1)','rgba(245, 158, 11, 1)','rgba(239, 68, 68, 1)','rgba(139, 92, 246, 1)'],
-                    borderWidth: 1, borderRadius: 6
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            analyseButton.textContent = "Analysing...";
         });
     }
 </script>

@@ -36,6 +36,12 @@ CLASS_NAMES = [
 IMAGE_SIZE = 224
 
 
+# Circle settings (hotspot circling)
+CIRCLE_THRESHOLD = 0.6      # CAM value above which a region counts as "hot"
+CIRCLE_THICKNESS = 3        # circle line thickness in pixels
+CIRCLE_COLOR_RGB = (255, 0, 0)
+
+
 # ============================================================
 # DEVICE
 # ============================================================
@@ -615,21 +621,93 @@ def make_gradcam_heatmap(
 
 
 # ============================================================
-# GENERATE OVERLAY
+# CIRCLE THE HOTTEST REGION
 # ============================================================
 
-def generate_gradcam(
+def circle_hotspot(
+    image_rgb,
+    heatmap,
+    threshold=CIRCLE_THRESHOLD,
+    thickness=CIRCLE_THICKNESS,
+    color=CIRCLE_COLOR_RGB
+):
+
+    """
+    Draw a circle around the largest high-activation
+    region of the Grad-CAM heatmap.
+
+    Args:
+        image_rgb: HxWx3 uint8 RGB image
+        heatmap:   2D float array scaled 0-1
+
+    Returns:
+        numpy.ndarray, same shape as image_rgb
+    """
+
+    height, width = image_rgb.shape[:2]
+
+    heatmap = cv2.resize(
+        heatmap,
+        (
+            width,
+            height
+        )
+    )
+
+    mask = (
+        heatmap >= threshold
+    ).astype(
+        np.uint8
+    )
+
+    output = image_rgb.copy()
+
+    contours, _ = cv2.findContours(
+        mask,
+        cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    if contours:
+
+        biggest = max(
+            contours,
+            key=cv2.contourArea
+        )
+
+        (x, y), radius = (
+            cv2.minEnclosingCircle(
+                biggest
+            )
+        )
+
+        cv2.circle(
+            output,
+            (
+                int(x),
+                int(y)
+            ),
+            int(radius),
+            color,
+            thickness
+        )
+
+    return output
+
+
+# ============================================================
+# GENERATE OVERLAY + CIRCLED IMAGE
+# ============================================================
+
+def _build_outputs(
     image,
     target_class=None
 ):
 
     """
-    Generate a JPEG-ready RGB Grad-CAM overlay.
-
-    Returns:
-        numpy.ndarray
-        shape = (224, 224, 3)
-        dtype = uint8
+    Internal helper. Returns:
+        overlay_rgb, circled_rgb, predicted_class
+    All images are (224, 224, 3) uint8 RGB.
     """
 
 
@@ -726,7 +804,65 @@ def generate_gradcam(
     )
 
 
+    # --------------------------------------------------------
+    # Circled image (on the plain original, not the overlay)
+    # --------------------------------------------------------
+
+    circled_rgb = circle_hotspot(
+        original_array,
+        heatmap
+    )
+
+
+    return (
+        overlay_rgb,
+        circled_rgb,
+        predicted_class
+    )
+
+
+def generate_gradcam(
+    image,
+    target_class=None
+):
+
+    """
+    Generate a JPEG-ready RGB Grad-CAM overlay.
+
+    Returns:
+        numpy.ndarray
+        shape = (224, 224, 3)
+        dtype = uint8
+    """
+
+    overlay_rgb, _, _ = _build_outputs(
+        image,
+        target_class
+    )
+
     return overlay_rgb
+
+
+def generate_gradcam_with_circle(
+    image,
+    target_class=None
+):
+
+    """
+    Generate both the Grad-CAM overlay and the
+    circled-hotspot image.
+
+    Returns:
+        (overlay_rgb, circled_rgb)
+        each numpy.ndarray, shape = (224, 224, 3), uint8
+    """
+
+    overlay_rgb, circled_rgb, _ = _build_outputs(
+        image,
+        target_class
+    )
+
+    return overlay_rgb, circled_rgb
 
 
 # ============================================================

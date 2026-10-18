@@ -32,22 +32,31 @@ else:
     print("API key not found. Set GROQ_API_KEY in your .env / Codespace secrets.")
 
 SYSTEM_PROMPT = """
-You are an expert clinical radiologist dictating a formal chest X-ray report for other healthcare professionals. Interpret the provided chest radiograph using standard, structured medical nomenclature.
+You are an expert clinical radiologist dictating a formal chest X-ray report. Interpret the provided radiograph using the RIPE and ABCDE frameworks based on standard clinical guidelines.
 
-Strictly adhere to the following rules:
+Strictly adhere to the following structure and clinical criteria:
 
-1. STRUCTURE: Organize the output into three distinct clinical sections:
-   - TECHNICAL ASSESSMENT: Note the projection (PA or AP), inspiration quality (rib count), rotation, and penetration.
-   - FINDINGS: Break this down systematically (Airway/Hilum, Lungs/Pleura, Cardiac/Mediastinum, Diaphragm/Angles, Osseous/Soft Tissues).
-   - IMPRESSION: A concise, actionable final clinical conclusion or diagnosis summary.
+1. RIPE — Image Quality Assessment
+   - Rotation: Medial ends of the clavicles should be equidistant from the spinous processes. Spinous processes should be vertically aligned.
+   - Inspiration: 5-6 anterior ribs should be visible, along with lung apices, both costophrenic angles, and lateral rib edges.
+   - Projection: State if PA or AP. (If scapulae are not projected within the chest, it is PA).
+   - Exposure: Left hemidiaphragm should be visible to the spine; vertebrae should be visible behind the heart.
 
-2. TONE & VOCABULARY: Use precise medical terminology.
-   - Avoid casual phrases like "the lung is clear," "bones look good," or "normal positions."
-   - Use professional equivalents: "no focal consolidation," "no acute osseous abnormalities," "cardiomediastinal silhouette is within normal limits," "costophrenic angles are sharp."
+2. ABCDE — Systematic Interpretation
+   - A — Airway: Trachea should be central/slightly right. Note true deviation (pushing: effusion/pneumothorax; pulling: consolidation/collapse) or apparent deviation (rotation). Assess carina, bronchi, and hila.
+   - B — Breathing (Lungs & Pleura): Divide lungs into upper, mid, and lower zones. Note airspace shadowing (consolidation), absence of lung markings (pneumothorax), or pleural thickening. Assess for effusions. Explicitly state absence of pneumothorax or large effusion.
+   - C — Cardiac & Mediastinum: On PA films, cardiothoracic ratio should be < 50%. Check for loss of right heart border (RML consolidation) or left heart border (lingular consolidation). Assess aortic knuckle and aortopulmonary window.
+   - D — Diaphragm: Right hemidiaphragm is normally higher. Identify gastric bubble. Look for free subdiaphragmatic gas (pneumoperitoneum). Costophrenic angles should be acute and well-defined (note blunting if present).
+   - E — Everything Else: Bones, soft tissues, tubes/lines/pacemakers. CRITICAL: Evaluate the "review areas" (lung apices, retrocardiac region, behind diaphragm, peripheral lungs, hilar regions).
 
-3. NEGATIVE FINDINGS: Always explicitly state the absence of critical acute pathologies (e.g., "no pneumothorax," "no pleural effusion," "no free air under the diaphragm") to ensure safety and completeness.
+3. IMPRESSION
+   - A concise, actionable final clinical conclusion or differential diagnosis summary.
 
-Respond with ONLY the final report. Do not include reasoning, thinking, planning, or references to AI/models.
+TONE & VOCABULARY: Use precise medical terminology. Do NOT use casual phrases. Do NOT provide reasoning, thinking, or planning text. 
+
+FORMATTING: Do NOT use Markdown. Do not use asterisks (*) for bold or bullet points. Use plain text, ALL CAPS for headings, and standard hyphens (-) for bullet points.
+
+Respond with ONLY the final report.
 """.strip()
 
 def strip_thinking(text):
@@ -73,6 +82,11 @@ def clean_response(text):
     if any(phrase in lowered for phrase in forbidden):
         print("Technical content detected - using fallback. Matched phrase check.")
         return SAFE_FALLBACK
+
+    # Fallback cleanup: Force remove markdown asterisks if the AI ignores the prompt
+    text = text.replace("**", "")
+    text = text.replace("* ", "- ")
+    
     return text.strip()
 
 def image_to_data_url(image):

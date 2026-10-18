@@ -5,146 +5,206 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Technician Dashboard</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/hospital-logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Fraunces:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
     <style>
+        :root {
+            --serif: "Fraunces", Georgia, "Times New Roman", serif;
+            --sans: "IBM Plex Sans", "Segoe UI", system-ui, Arial, sans-serif;
+            --ink: #0F1B2D;
+            --text: #43536B;
+            --muted: #5A6B82;
+            --line: #E1E7EE;
+            --blue: #2563EB;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         /* Hide Scrollbars */
-        html, body { scrollbar-width: none; -ms-overflow-style: none; }
-        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+        html, body, .main { scrollbar-width: none; -ms-overflow-style: none; }
+        html::-webkit-scrollbar, body::-webkit-scrollbar, .main::-webkit-scrollbar { display: none; }
 
-        body { font-family: Arial, Helvetica, sans-serif; background: #eef4f6; color: #20353d; min-height: 100vh; overflow: hidden; }
-        .technician-main { flex: 1; min-width: 0; height: 100vh; overflow-y: auto; padding: 25px 25px 80px; }
-        .dashboard { width: min(1400px, 96%); margin: auto; }
+        html, body { width: 100%; height: 100%; font-family: var(--sans); background: #F3F5F8; color: var(--ink); overflow: hidden; }
 
-        .header { background: white; padding: 22px 28px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
-        .header h1 { color: #173e4c; font-size: 25px; margin-bottom: 6px; }
-        .header p { color: #74858c; font-size: 13px; }
-        .logout { text-decoration: none; background: #edf3f5; color: #27677a; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; }
+        .main { flex: 1; min-width: 0; height: 100vh; overflow-y: auto; padding: 36px 48px 84px; }
+        .page { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
-        .message { padding: 12px 15px; border-radius: 8px; font-size: 12px; margin-bottom: 20px; }
-        .success { background: #edf8f1; color: #267344; border: 1px solid #ccebd6; }
-        .error { background: #fff1f1; color: #a82a2a; border: 1px solid #f2cccc; }
+        .topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+        .page-title { font-family: var(--serif); font-weight: 600; font-size: 36px; letter-spacing: -0.01em; }
+        .page-subtitle { margin-top: 4px; font-size: 15px; color: var(--muted); }
 
-        .create-card { background: white; border-radius: 14px; padding: 25px; margin-bottom: 22px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
-        .create-card h2 { color: #173e4c; font-size: 19px; margin-bottom: 7px; }
-        .description { color: #7a8990; font-size: 12px; margin-bottom: 20px; }
-        .create-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 14px; align-items: end; }
-        .form-group label { display: block; font-size: 11px; font-weight: bold; color: #40545c; margin-bottom: 6px; }
-        input { width: 100%; height: 42px; border: 1px solid #d7e0e4; border-radius: 7px; padding: 0 12px; font-size: 12px; outline: none; }
-        input:focus { border-color: #39758a; }
-        .create-button { height: 42px; border: none; border-radius: 7px; padding: 0 18px; background: #27677a; color: white; font-weight: bold; font-size: 11px; cursor: pointer; }
-        .create-button:hover { background: #1f5869; }
+        .message { padding: 12px 15px; border-radius: 10px; font-size: 14px; }
+        .message.success { background: #E2F4EA; color: #14693A; border: 1px solid #B7E2C8; }
+        .message.error { background: #FDECEA; color: #9B2C1F; border: 1px solid #F0CFC9; }
 
-        .staff-card { background: white; border-radius: 14px; padding: 25px; box-shadow: 0 8px 25px rgba(23, 57, 68, 0.08); }
-        .staff-card h2 { color: #173e4c; font-size: 19px; margin-bottom: 7px; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        th { text-align: left; padding: 13px 10px; border-bottom: 1px solid #dfe7ea; color: #71838a; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
-        td { padding: 14px 10px; border-bottom: 1px solid #edf0f1; color: #43565e; font-size: 12px; }
-        .inline-form { display: flex; gap: 6px; align-items: center; }
-        .small-input { width: 130px; height: 34px; font-size: 11px; }
-        .small-button { height: 34px; border: none; border-radius: 6px; padding: 0 10px; background: #27677a; color: white; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .small-button:hover { background: #1f5869; }
-        .danger-button { background: #a84a4a; }
-        .danger-button:hover { background: #8d3838; }
-        .activate-button { background: #397b55; }
-        .activate-button:hover { background: #2e6645; }
-        .status { display: inline-block; padding: 5px 9px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
-        .active { background: #e9f6ee; color: #2b7a48; }
-        .inactive { background: #fbeaea; color: #a43a3a; }
+        .card { background: #ffffff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+        .card h2 { font-size: 18px; font-weight: 700; }
+        .card-sub { font-size: 14px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+        /* FORMS */
+        input { font-family: var(--sans); }
+        .field-input { width: 100%; height: 44px; border: 1px solid #B8C4D6; border-radius: 10px; padding: 0 14px; font-size: 14px; color: var(--ink); background: #ffffff; outline: none; }
+        .field-input::placeholder { color: #6B7A90; }
+        .field-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #CFE0FD; }
+
+        .create-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: end; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+
+        .btn { height: 44px; padding: 0 22px; border: 1px solid var(--blue); border-radius: 10px; background: var(--blue); color: #ffffff; font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; }
+        .btn:hover { background: #1E40AF; border-color: #1E40AF; }
+        .btn:focus-visible, .btn-small:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+        .btn-small { height: 36px; padding: 0 14px; border: 1px solid var(--blue); border-radius: 8px; background: var(--blue); color: #ffffff; font: 500 13px var(--sans); cursor: pointer; white-space: nowrap; }
+        .btn-small:hover { background: #1E40AF; border-color: #1E40AF; }
+        .btn-danger { background: #ffffff; border-color: #F0CFC9; color: #9B2C1F; }
+        .btn-danger:hover { background: #FDECEA; border-color: #F0CFC9; }
+        .btn-activate { background: #14693A; border-color: #14693A; }
+        .btn-activate:hover { background: #0F5530; border-color: #0F5530; }
+
+        /* TABLE */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+        .tbl { width: 100%; border-collapse: collapse; min-width: 1040px; font-size: 14px; }
+        .tbl th { text-align: left; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 12px 14px; background: #F6F8FB; white-space: nowrap; }
+        .tbl td { padding: 14px; border-top: 1px solid #EDF1F5; vertical-align: middle; }
+        .tbl tr:hover td { background: #FAFBFD; }
+        .tbl td.empty-state { text-align: center; padding: 44px 20px; color: var(--muted); }
+        .staff-id { font: 500 13px var(--mono, "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace); font-weight: 600; }
+        .inline-form { display: flex; gap: 8px; align-items: center; }
+        .small-input { width: 140px; min-width: 0; height: 36px; border: 1px solid #B8C4D6; border-radius: 8px; padding: 0 10px; font-size: 13px; background: #ffffff; outline: none; }
+        .small-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #CFE0FD; }
+
+        .chip { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+        .chip-on { background: #E2F4EA; color: #14693A; }
+        .chip-off { background: #FDECEA; color: #9B2C1F; }
 
         /* FIXED GLOBAL FOOTER */
-        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 11px; color: #6b7280; padding: 12px 10px; background: #ffffff; border-top: 1px solid #e5e7eb; z-index: 9999; }
+        .global-footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 12px; color: var(--text); padding: 12px 16px; background: #ffffff; border-top: 1px solid var(--line); z-index: 9999; }
 
-        @media (max-width: 1000px) { .create-form { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 650px) {
-            .technician-main { height: auto; overflow: visible; padding: 12px 12px 70px; }
-            .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .main { padding: 28px 24px 84px; }
+            .create-form { grid-template-columns: 1fr 1fr; }
+            .create-form .btn { grid-column: 1 / -1; }
+
+            /* staff table: each account becomes a card with a grid of labelled cells */
+            .table-wrap { overflow: visible; border: 0; border-radius: 0; }
+            .tbl, .tbl tbody { display: block; width: 100%; min-width: 0; }
+            .tbl thead { display: none; }
+            .tbl tr { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: #EDF1F5; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+            .tbl tr:last-child { margin-bottom: 0; }
+            .tbl td { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 14px; border: 0; background: #ffffff; }
+            .tbl td::before { content: attr(data-label); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+            .tbl tr:hover td { background: #ffffff; }
+            .tbl td.empty-state { grid-column: 1 / -1; align-items: center; }
+            .tbl td.empty-state::before { content: none; }
+            .inline-form { width: 100%; }
+            .small-input { flex: 1; width: auto; }
+        }
+
+        @media (max-width: 900px) {
+            html, body { height: auto; overflow: auto; }
+            .main { height: auto; overflow: visible; padding: 20px 20px 96px; }
+            .page-title { font-size: 30px; }
+            .topbar { align-items: flex-start; }
+        }
+
+        @media (max-width: 600px) {
+            .main { padding: 16px 14px 96px; }
+            .page { gap: 16px; }
+            .page-title { font-size: 26px; }
+            .page-subtitle { font-size: 14px; }
+            .card { padding: 16px; gap: 16px; }
             .create-form { grid-template-columns: 1fr; }
+            .field-input, .small-input { font-size: 16px; }
+            .global-footer { font-size: 11px; padding: 10px 12px; }
         }
     </style>
 </head>
 <body>
 <div class="app">
 {% include '_navigation.html' %}
-<main class="technician-main">
-<div class="dashboard">
-    <header class="header">
+<main class="main" id="main-content">
+<div class="page">
+    <header class="topbar">
         <div>
-            <h1>Technician Dashboard</h1>
-            <p>{{ full_name }} | Technician ID: {{ staff_id }}</p>
+            <h1 class="page-title">Technician Dashboard</h1>
+            <p class="page-subtitle">{{ full_name }} | Technician ID: {{ staff_id }}</p>
         </div>
-        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
     </header>
 
     {% if success %}<div class="message success">{{ success }}</div>{% endif %}
     {% if error %}<div class="message error">{{ error }}</div>{% endif %}
 
-    <section class="create-card">
-        <h2>Add Staff Member</h2>
-        <p class="description">Create credentials for authorized clinical personnel.</p>
+    <section class="card">
+        <div>
+            <h2>Add staff member</h2>
+            <p class="card-sub">Create credentials for authorized clinical personnel.</p>
+        </div>
         <form class="create-form" action="{{ url_for('create_staff') }}" method="POST">
-            <div class="form-group"><label>FULL NAME</label><input type="text" name="full_name" placeholder="Staff member name" required></div>
-            <div class="form-group"><label>STAFF ID</label><input type="text" name="staff_id" placeholder="STAFF003" required></div>
-            <div class="form-group"><label>INITIAL PASSWORD</label><input type="password" name="password" placeholder="Minimum 8 characters" minlength="8" required></div>
-            <button type="submit" class="create-button">ADD STAFF</button>
+            <div class="form-group"><label for="new-full-name">Full name</label><input class="field-input" id="new-full-name" type="text" name="full_name" placeholder="Staff member name" required></div>
+            <div class="form-group"><label for="new-staff-id">Staff ID</label><input class="field-input" id="new-staff-id" type="text" name="staff_id" placeholder="STAFF003" required></div>
+            <div class="form-group"><label for="new-password">Initial password</label><input class="field-input" id="new-password" type="password" name="password" placeholder="Minimum 8 characters" minlength="8" required></div>
+            <button type="submit" class="btn">Add staff</button>
         </form>
     </section>
 
-    <section class="staff-card">
-        <h2>Staff Account Management</h2>
-        <p class="description">Update staff information, credentials, and account status.</p>
-        <div class="table-wrapper">
-            <table>
+    <section class="card">
+        <div>
+            <h2>Staff account management</h2>
+            <p class="card-sub">Update staff information, credentials, and account status.</p>
+        </div>
+        <div class="table-wrap">
+            <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Staff ID</th><th>Name</th><th>Status</th><th>Change ID</th><th>Change Password</th><th>Change Name</th><th>Account</th>
+                        <th>Staff ID</th><th>Name</th><th>Status</th><th>Change ID</th><th>Change password</th><th>Change name</th><th>Account</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td><strong>{{ user["staff_id"] }}</strong></td>
-                        <td>{{ user["full_name"] }}</td>
-                        <td>{% if user["status"] == "active" %}<span class="status active">Active</span>{% else %}<span class="status inactive">Inactive</span>{% endif %}</td>
-                        <td>
+                        <td data-label="Staff ID"><span class="staff-id">{{ user["staff_id"] }}</span></td>
+                        <td data-label="Name">{{ user["full_name"] }}</td>
+                        <td data-label="Status">{% if user["status"] == "active" %}<span class="chip chip-on">Active</span>{% else %}<span class="chip chip-off">Inactive</span>{% endif %}</td>
+                        <td data-label="Change ID">
                             <form class="inline-form" action="{{ url_for('update_staff_id_route') }}" method="POST">
                                 <input type="hidden" name="user_id" value="{{ user['id'] }}">
-                                <input class="small-input" type="text" name="new_staff_id" placeholder="New ID" required>
-                                <button class="small-button" type="submit">UPDATE</button>
+                                <input class="small-input" type="text" name="new_staff_id" placeholder="New ID" aria-label="New staff ID for {{ user['staff_id'] }}" required>
+                                <button class="btn-small" type="submit">Update</button>
                             </form>
                         </td>
-                        <td>
+                        <td data-label="Change password">
                             <form class="inline-form" action="{{ url_for('update_staff_password_route') }}" method="POST">
                                 <input type="hidden" name="user_id" value="{{ user['id'] }}">
-                                <input class="small-input" type="password" name="new_password" placeholder="New password" minlength="8" required>
-                                <button class="small-button" type="submit">UPDATE</button>
+                                <input class="small-input" type="password" name="new_password" placeholder="New password" minlength="8" aria-label="New password for {{ user['staff_id'] }}" required>
+                                <button class="btn-small" type="submit">Update</button>
                             </form>
                         </td>
-                        <td>
+                        <td data-label="Change name">
                             <form class="inline-form" action="{{ url_for('update_staff_name_route') }}" method="POST">
                                 <input type="hidden" name="user_id" value="{{ user['id'] }}">
-                                <input class="small-input" type="text" name="new_name" placeholder="New name" required>
-                                <button class="small-button" type="submit">UPDATE</button>
+                                <input class="small-input" type="text" name="new_name" placeholder="New name" aria-label="New name for {{ user['staff_id'] }}" required>
+                                <button class="btn-small" type="submit">Update</button>
                             </form>
                         </td>
-                        <td>
+                        <td data-label="Account">
                             {% if user["status"] == "active" %}
                                 <form action="{{ url_for('deactivate_staff_route') }}" method="POST">
                                     <input type="hidden" name="user_id" value="{{ user['id'] }}">
-                                    <button type="submit" class="small-button danger-button">DEACTIVATE</button>
+                                    <button type="submit" class="btn-small btn-danger">Deactivate</button>
                                 </form>
                             {% else %}
                                 <form action="{{ url_for('activate_staff_route') }}" method="POST">
                                     <input type="hidden" name="user_id" value="{{ user['id'] }}">
-                                    <button type="submit" class="small-button activate-button">ACTIVATE</button>
+                                    <button type="submit" class="btn-small btn-activate">Activate</button>
                                 </form>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="7">No staff accounts found.</td></tr>
+                    <tr><td colspan="7" class="empty-state">No staff accounts found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
