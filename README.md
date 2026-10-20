@@ -1,481 +1,697 @@
 # X-RAY-IMAGE-SCANNER2
+# Chest X-Ray Clinical Support System
 
-**Chest X-Ray Clinical Support Prototype: Project Documentation**
-
-> **Disclaimer.** This is a university research prototype. It has not been validated as a medical device, has not been clinically evaluated, and must not be used to diagnose or treat patients. All outputs must be reviewed by a qualified radiologist or physician.
-
-# 1. Overview
 
 <p align="center">
-  <img src="docs/overview.png" alt="Application overview" width="520">
+  <img src="clinical-support-system/static/images/hospital-logo.png" width="90">
 </p>
 
-X-RAY-IMAGE-SCANNER2 is a Flask-based clinical support application. It uses a fine-tuned ResNet-50 model to classify chest X-ray images and presents explainable predictions to healthcare workers. The system was developed with the shortage of radiologists in Africa and other low-resource healthcare settings in mind.
 
-The model classifies each image into one of four categories:
+A Flask-based clinical support application that uses a **PyTorch ResNet-50 deep learning model** to classify chest X-ray images into four categories:
 
-- COVID-19
-- Tuberculosis (TB)
-- Pneumonia
-- Normal
+* COVID19
+* NORMAL
+* PNEUMONIA
+* TB
 
-In addition to the classifier, the system provides calibrated confidence scores, Grad-CAM visual explanations, role-based access control, and case management.
+The system allows users to upload X-ray images, obtain a model prediction, view Grad-CAM visualizations, store case information in a database(SQLLITE), and generate an AI-assisted interpretation using **Groq and Qwen**.
 
-# 2. Why This Matters
+## Main Features
 
-**The diagnostic gap.** The figures below should be verified and cited against their original sources before publication.
+* Chest X-ray image upload
+* ResNet-50 four-class classification
+* Image preprocessing and normalization
+* SQLite database for uploaded cases
+* Grad-CAM visual explanations
+* AI-assisted interpretation using Groq/Qwen
+* Web interface built with Flask
+* Git LFS support for the trained model
+
+<h2>Project Architecture</h2>
+
+<p align="center">
+  <img src="clinical-support-system/static/images/project_architecture.png" width="900">
+</p>
+
+<p align="center">
+  <b>Project Architecture of the Chest X-Ray Clinical Support System</b>
+</p>
+
+<b>X-RAY-IMAGE-SCANNER2: Chest X-Ray Clinical Support Prototype</b>
+
+
+# X-RAY-IMAGE-SCANNER2
+
+**Chest X-Ray Clinical Support Prototype**
+
+A Flask web application that uses a fine-tuned ResNet-50 model to classify chest X-rays and give healthcare workers explainable predictions. Built with the radiologist shortage in Africa and other low-resource settings in mind.
+
+> **Important disclaimer**
+> This is a university research prototype. It is **not** a validated medical device, has **not** been clinically evaluated, and **must not** be used to diagnose or treat patients. All outputs must be reviewed by a qualified radiologist or physician.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Why This Matters](#why-this-matters)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Installation and Setup](#installation-and-setup)
+- [Main Features](#main-features)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Dataset](#dataset)
+- [Model Architecture](#model-architecture)
+- [Model Performance](#model-performance)
+- [Explainability: Grad-CAM](#explainability-grad-cam)
+- [Calibration and Confidence](#calibration-and-confidence)
+- [Model Development and Evaluation](#model-development-and-evaluation)
+- [Known Limitations and Future Work](#known-limitations-and-future-work)
+- [Security and Privacy](#security-and-privacy)
+- [Project Structure](#project-structure)
+- [Technologies and Stack](#technologies-and-stack)
+- [Contributing](#contributing)
+- [Support and Contact](#support-and-contact)
+- [Citation](#citation)
+- [License](#license)
+- [References and Resources](#references-and-resources)
+- [Team](#team)
+- [Acknowledgments](#acknowledgments)
+- [FAQ](#faq)
+
+---
+
+## Overview
+
+The system classifies a chest X-ray into one of four classes:
+
+| Class | Label |
+|-------|-------|
+| COVID-19 | `COVID-19` |
+| Tuberculosis | `TB` |
+| Pneumonia | `Pneumonia` |
+| Normal | `Normal` |
+
+Beyond the model itself, the application adds:
+
+- Calibrated confidence scores
+- Grad-CAM visual explanations
+- AI-generated plain-language image descriptions
+- Role-based access control
+- Case management with an audit trail
+
+Together these turn a trained model into a usable prototype tool.
+
+---
+
+## Why This Matters
+
+**The diagnostic gap**
 
 - Sub-Saharan Africa has far fewer radiologists per million people than Europe.
 - South Africa has a limited number of registered radiologists for its population.
-- South Africa records a very large number of new TB cases each year (WHO Global TB Report).
+- South Africa records a very large number of new TB cases each year (see the WHO Global TB Report).
 - A meaningful share of South African TB patients are also HIV co-infected, which can make chest X-rays harder to interpret.
-- Even expert radiologist reports contain a measurable error rate.
+- Even expert radiologist reads contain a measurable error rate.
 
-**Approach.** The system is intended to act as an AI second reader. It flags likely disease, highlights the image regions that influenced its decision, and refers uncertain cases to human reviewers.
+**Our approach:** an AI second reader that flags likely disease, highlights the image regions that influenced its decision, and defers to humans when uncertain.
 
-# 3. Quick Start
+---
+
+## Quick Start
 
 ```bash
-# 1. Clone the repository and create a virtual environment
-git clone https://github.com/avelohlachwayo0828-coder/X-RAY-IMAGE-SCANNER2.git
-cd X-RAY-IMAGE-SCANNER2
+# 1. Clone and set up the environment
+git clone <repository-url>
+cd <repository-folder>
 python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
-# 2. Download the model weights (Git LFS) and install dependencies
+# 2. Install dependencies and download the model
+pip install -r requirements.txt
 git lfs pull
-pip install -r clinical-support-system/requirements.txt
 
 # 3. Configure the Groq API key
 export GROQ_API_KEY="your_key_here"
 
-# 4. Start the application
-cd clinical-support-system
+# 4. Run the application
 python auth_server.py
 ```
 
-Open `http://localhost:5000` in a web browser and sign in with your Staff ID.
+Then open <http://localhost:5000> and log in with your Staff ID.
 
-# 4. Prerequisites
+---
 
-| Requirement | Version | Installation |
-|:---|:---|:---|
-| Python | 3.10 or later (Python 3.8 is end-of-life and is not supported by recent PyTorch releases) | https://www.python.org/downloads/ |
+## Prerequisites
+
+| Requirement | Version | Where to get it |
+|-------------|---------|-----------------|
+| Python | 3.10 or newer (3.8 is end-of-life and unsupported by recent PyTorch) | <https://www.python.org/downloads/> |
 | pip | Latest | Bundled with Python |
-| Git | Latest | https://git-scm.com/downloads |
-| Git LFS | Latest | https://git-lfs.com/ |
-| Groq API key | Free tier available | https://console.groq.com/ |
+| Git | Latest | <https://git-scm.com/downloads> |
+| Git LFS | Latest | <https://git-lfs.com/> |
+| Groq API key | Free tier available | <https://console.groq.com/> |
 
-# 5. Installation and Setup
+---
 
-## 5.1 Standard Installation
+## Installation and Setup
 
-**Step 1: Clone the repository.**
+### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/avelohlachwayo0828-coder/X-RAY-IMAGE-SCANNER2.git
-cd X-RAY-IMAGE-SCANNER2
+git clone <repository-url>
+cd <repository-folder>
 ```
 
-**Step 2: Create a virtual environment.**
+### Step 2: Create a virtual environment
+
+**macOS / Linux**
 
 ```bash
-# macOS / Linux
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
-# Windows (PowerShell)
+**Windows (PowerShell)**
+
+```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
+```
 
-# Windows (Command Prompt)
+**Windows (Command Prompt)**
+
+```bat
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-**Step 3: Download the trained model.** The weights file, `models/resnet50_final.pth`, is stored with Git LFS. Install Git LFS first, then pull the file. A clone without LFS produces a small text pointer instead of the model.
+### Step 3: Install dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Step 4: Download the trained model
 
 ```bash
 git lfs install
 git lfs pull
 ```
 
-**Step 4: Install dependencies.**
+> **Note:** If Git LFS is not installed, download the model from the Releases page and place it at `models/resnet50_xray.pth`.
+
+### Step 5: Configure the Groq API key
+
+The AI interpretation feature needs a free Groq API key. Get one at <https://console.groq.com/>.
+
+**macOS / Linux**
 
 ```bash
-pip install --upgrade pip
-pip install -r clinical-support-system/requirements.txt
+export GROQ_API_KEY="your_groq_api_key_here"
 ```
 
-**Step 5: Configure the Groq API key.**
+**Windows (PowerShell)**
 
-The AI interpretation feature requires a Groq API key, which is available free of charge from https://console.groq.com/. The key can be set as an environment variable, or placed in a `.env` file inside `clinical-support-system/`.
-
-```bash
-# macOS / Linux
-export GROQ_API_KEY="your_groq_api_key_here"
-
-# Windows (PowerShell)
+```powershell
 $env:GROQ_API_KEY = "your_groq_api_key_here"
+```
 
-# Windows (Command Prompt)
+**Windows (Command Prompt)**
+
+```bat
 set GROQ_API_KEY=your_groq_api_key_here
 ```
 
-**Step 6: Start the application.**
+**For team environments (GitHub Codespaces)**
+
+1. Go to **Repository > Settings > Secrets and variables > Codespaces**.
+2. Click **New repository secret**.
+3. Name: `GROQ_API_KEY`
+4. Value: your Groq API key (each team member should use their own).
+
+### Step 6: Run the application
 
 ```bash
-cd clinical-support-system
 python auth_server.py
 ```
 
-## 5.2 Team Environments (GitHub Codespaces)
+Log in with a staff account created for you by the technician.
 
-1. Go to Repository, then Settings, then Secrets and variables, then Codespaces.
-2. Select **New repository secret**.
-3. Set the name to `GROQ_API_KEY`.
-4. Set the value to your Groq API key. Each team member should use their own key.
 
-# 6. Main Features
+## Main Features
 
-**6.1 Image analysis**
+### 1. Image analysis
 
-- Chest X-ray upload in JPG, JPEG, or PNG format
-- ResNet-50 four-class classification, with 96.24% accuracy on the held-out test set
-- Calibrated confidence scores with automatic flagging of uncertain predictions
+- Chest X-ray upload (JPG, JPEG, PNG)
+- ResNet-50 four-class classification (96.24% accuracy on the held-out test set)
+- Calibrated confidence scores with automatic uncertainty flagging
 
-**6.2 Explainability**
+### 2. Explainability
 
-- Grad-CAM heatmaps showing which image regions influenced the prediction
-- Layer comparison (layer3 and layer4) for resolution checks
-- Plain-language interpretation of the findings, generated with the Groq API and the Qwen model
+- Grad-CAM heatmaps showing which regions influenced the prediction
+- Layer comparison (layer3 vs layer4) for resolution checks
+- AI-assisted plain-language interpretation using Groq and a Qwen LLM
 
-**6.3 Case management and audit trail**
+### 3. Case management and audit trail
 
 - SQLite database of cases and predictions
-- A unique case ID, timestamp, prediction, and confidence value for every case
-- A "Review recommended" flag for low-confidence cases
-- Case history that can be searched by date, prediction, and status
+- Unique case ID, timestamp, prediction and confidence for every case
+- Automatic "Review recommended" flag for low-confidence cases
+- Case history searchable by date, prediction and status
 
-**6.4 Oversight**
+### 4. Oversight
 
-- Statistics dashboard showing total cases analysed, pending cases, and failed analyses
+- Statistics dashboard (total analysed, pending, failed)
 - Diagnosis breakdown visualisation
-- A reports view that consolidates flagged cases
+- Flagged cases consolidated in one reports view
 - Staff login with role-based access control
 
-**6.5 Lightweight deployment**
+### 5. Lightweight deployment
 
-- Raw model inference of approximately 6.06 ms per image, measured on a CUDA-enabled GPU in a Kaggle notebook environment. This figure excludes preprocessing, Grad-CAM generation, and the LLM call.
-- Model size of 89.7 MB on disk, with 23.5 million parameters
-- Model weights distributed through Git LFS (`models/resnet50_final.pth`)
-- Flask web interface. The classifier does not require a separate inference server.
+- Raw model inference of about 5.56 ms per image
+- 89.7 MB on disk, 23.5M parameters
+- Git LFS for model distribution
+- Flask web interface; the classifier needs no separate inference server
 
-# 7. Usage
+---
 
-**Signing in.** Log in with your Staff ID and password. Both are configured by the system technician. Access is restricted to authorised personnel.
+## Usage
 
-**Analysing a new X-ray.**
+### Log in
 
-1. Select **New X-Ray Analysis**.
-2. Upload a chest X-ray image in JPG, JPEG, or PNG format.
-3. Wait for processing. The classifier itself returns results in milliseconds. Grad-CAM generation and the AI explanation add a few seconds, depending on hardware and network speed.
+| Field | Value |
+|-------|-------|
+| Username | Staff ID (configured by the technician) |
+| Password | Staff password (configured by the technician) |
+
+Access is restricted to authorised personnel.
+
+### Analyse a new X-ray
+
+1. Click **New X-Ray Analysis**.
+2. Upload a chest X-ray image (JPG, JPEG or PNG).
+3. Wait for processing. The classifier itself takes milliseconds; Grad-CAM and the AI explanation add a few seconds depending on hardware and network.
 4. Review the results:
-   - **Prediction:** COVID-19, TB, Pneumonia, or Normal
-   - **Confidence score:** calibrated model certainty, from 0% to 100%
-   - **Status:** "Proceed" or "Review recommended" (the latter applies when calibrated confidence is below 90%)
-   - **Grad-CAM heatmap:** visual explanation overlay
-   - **AI explanation:** plain-language description of the findings
 
-**Reviewing case history.** Select **Analysis History** to browse previous cases by date, prediction, or confidence. Cases can be searched and filtered by case ID or diagnosis.
+| Result | Meaning |
+|--------|---------|
+| Prediction | COVID-19, TB, Pneumonia or Normal |
+| Confidence score | Calibrated model certainty (0-100%) |
+| Status | "Proceed", or "Review recommended" if calibrated confidence is below 90% |
+| Grad-CAM heatmap | Visual explanation overlay |
+| AI explanation | Plain-language description of the findings |
 
-**Viewing statistics and reports.** Select **Reports & Statistics** to see total cases, the diagnosis breakdown, and pending reviews, and to identify cases flagged for human review.
+### Review case history
 
-**Managing staff accounts (technician only).** Select **Technician Dashboard** to add, update, or deactivate staff accounts and to manage access permissions.
+1. Click **Analysis History**.
+2. Browse previous cases by date, prediction or confidence.
+3. Search and filter by case ID or diagnosis.
 
-# 8. Dataset
+### View statistics and reports
 
-**Source.** The Chest X-Ray dataset with four categories (COVID-19, Pneumonia, Tuberculosis, and Normal) was published by Pritpal Singh on Kaggle under the Apache 2.0 licence: https://www.kaggle.com/datasets/pritpal2873/chest-x-ray-dataset-4-categories
+1. Click **Reports and Statistics**.
+2. See total cases, diagnosis breakdown and pending reviews.
+3. Identify cases flagged for human review.
 
-**Statistics**
+### Manage staff (technician only)
 
-- Total images: 7,132 before cleaning and 6,736 after cleaning
-- Train, validation, and test split: 4,715, 1,010, and 1,011 images (stratified 70/15/15 split)
-- Class distribution: Pneumonia 60% (majority class), Normal 22%, Tuberculosis 10%, COVID-19 8% (minority class)
-- Imbalance ratio: 7.42 to 1
+1. Click **Technician Dashboard**.
+2. Add, update or deactivate staff accounts.
+3. Manage access permissions.
 
-**Data cleaning**
+---
 
-- Corruption check: all 7,132 files were verified, and none were corrupted.
-- Duplicate detection: MD5 hashing removed 40 exact duplicates.
-- Quality filtering: per-class sharpness filtering removed the bottom 5% of images, which accounted for 356 images.
-- Orientation check: a rotation and symmetry audit confirmed consistent framing.
+## Troubleshooting
 
-**Preprocessing pipeline**
+### `ModuleNotFoundError: No module named 'torch'`
 
-1. Border crop: a 5% margin is trimmed to remove scanner labels and edge artefacts.
-2. Resize to 224 × 224 pixels, the ResNet-50 input size.
-3. ImageNet normalisation, which matches the pretrained backbone.
-4. Augmentation, applied during training only: random horizontal flips and rotations of up to ±10°.
+Activate your virtual environment and reinstall the dependencies:
 
-# 9. Model Architecture
+```bash
+source .venv/bin/activate        # macOS / Linux
+pip install -r requirements.txt --force-reinstall
+```
 
-**Rationale for ResNet-50**
+### "Model file not found" or Git LFS error
+
+```bash
+git lfs install
+git lfs pull
+```
+
+If it still fails, download the model manually from Releases and place it at `models/resnet50_xray.pth`.
+
+### "GROQ_API_KEY not found"
+
+Check that the variable is set. The command prints the key, so do not share the output.
+
+```bash
+echo $GROQ_API_KEY               # macOS / Linux
+echo %GROQ_API_KEY%              # Windows (Command Prompt)
+```
+
+If it is empty, set it again and restart the application.
+
+
+## Dataset
+
+**Source:** Chest X-Ray dataset (4 categories: COVID-19, Pneumonia, Tuberculosis, Normal) by Pritpal Singh on Kaggle, listed under the Apache 2.0 license.
+Link: <https://www.kaggle.com/datasets/pritpal2873/chest-x-ray-dataset-4-categories>
+
+### Statistics
+
+| Item | Value |
+|------|-------|
+| Total images | 7,132 (6,736 after cleaning) |
+| Train / Validation / Test | 4,715 / 1,010 / 1,011 (70/15/15 stratified split) |
+| Imbalance ratio | 7.42 : 1 |
+
+| Class | Share of data |
+|-------|---------------|
+| Pneumonia | 60% (majority) |
+| Normal | 22% |
+| Tuberculosis | 10% |
+| COVID-19 | 8% (minority) |
+
+### Data cleaning
+
+- **Corruption check:** all 7,132 files verified, 0 corrupted
+- **Duplicate detection:** MD5 hashing removed 40 exact duplicates
+- **Quality filtering:** per-class sharpness filtering (bottom 5%) removed 356 images
+- **Orientation check:** rotation/symmetry audit for consistent framing
+
+### Preprocessing pipeline
+
+1. **Border crop:** 5% margin trim to remove scanner labels and edge artefacts
+2. **Resize** to 224x224 (ResNet-50 input size)
+3. **ImageNet normalisation** (matches the pretrained backbone)
+4. **Augmentation (training only):** random horizontal flip and +/-10 degree rotation
+
+---
+
+## Model Architecture
+
+### Why ResNet-50?
 
 - Residual (skip) connections enable stable training at depth.
 - ImageNet pretrained weights speed up convergence on small medical datasets.
-- At 89.7 MB, the model is practical for modest hospital hardware.
-- Validation metrics were marginally better than those of a DenseNet-121 baseline.
+- At 89.7 MB it is practical for modest hospital hardware.
+- Marginally better validation metrics than a DenseNet-121 baseline.
 
-**Architecture details**
+### Details
 
-- Input: 224 × 224 × 3 RGB images
-- Backbone: ResNet-50 with ImageNet pretrained weights
-  - Stem: 7 × 7 convolution and max-pooling
-  - Four residual stages containing 3, 4, 6, and 3 bottleneck blocks
-- Output head: fully connected layer producing a four-way classification
-- Total parameters: 23.5 million
-- Loss function: class-weighted cross-entropy with inverse-frequency weighting
+| Item | Value |
+|------|-------|
+| Input | 224 x 224 x 3 RGB images |
+| Backbone | ResNet-50 (ImageNet pretrained) |
+| Stem | 7x7 convolution + max-pool |
+| Residual stages | 4 stages with 3, 4, 6, 3 bottleneck blocks |
+| Output head | Fully-connected layer, 4-way classification |
+| Total parameters | 23.5M |
+| Loss | Class-weighted cross-entropy (inverse-frequency weighting) |
 
-**Training**
+### Training
 
-- Optimiser: Adam, with an initial learning rate of 1e-4 and ReduceLROnPlateau (factor 0.5, patience 2)
-- Batch size: 32
-- Maximum epochs: 15, with early stopping (patience 3 on validation loss)
-- Training stopped at epoch 5. The best validation loss, 0.108, was recorded at epoch 2.
-- Final results: validation accuracy of 96.1% and training accuracy of 97%
+| Setting | Value |
+|---------|-------|
+| Optimiser | Adam, initial learning rate 1e-4 |
+| Scheduler | ReduceLROnPlateau (factor 0.5, patience 2) |
+| Batch size | 32 |
+| Max epochs | 15, with early stopping (patience 3 on validation loss) |
+| Stopped at | Epoch 5 (best validation loss 0.108 at epoch 2) |
+| Final accuracy | Validation 96.1%, training 97% |
 
-# 10. Model Performance
+---
 
-The model was evaluated once on the held-out test set of 1,011 images.
+## Model Performance
+
+Evaluated once on the held-out test set (1,011 images).
 
 | Metric | Value |
-|:---|:---|
+|--------|-------|
 | Test accuracy | 96.24% |
 | Weighted F1-score | 0.9625 |
 | ROC-AUC (weighted, one-vs-rest) | 0.9966 |
-| Macro F1-score | 0.96 |
+| Macro F1-score | 0.9625 |
 | Model size | 89.7 MB |
-| Raw inference time | 6.06 ms per image (165 images per second) |
+| Raw inference time | 5.56 ms/image |
 
-**Per-class results**
+### Per-class results
 
 | Class | Precision | Recall | Notes |
-|:---|:---|:---|:---|
+|-------|-----------|--------|-------|
 | COVID-19 | 0.99 | 0.95 | Minority class; small test sample |
-| Tuberculosis | 0.96 | 1.00 | No missed TB cases in this test set. The sample is small, so this is not a guarantee. |
-| Pneumonia | 0.98 | 0.97 | Some confusion with Normal |
+| Tuberculosis | 0.96 | 1.00 | No missed TB cases in this test set (small sample; not a guarantee) |
+| Pneumonia | 0.94 | 0.96 | Some confusion with Normal |
 | Normal | 0.91 | 0.94 | Weakest class; most confusion with Pneumonia |
 
-# 11. Explainability: Grad-CAM
+---
 
-Each prediction includes a Grad-CAM heatmap showing the image regions that most influenced the model's decision. Grad-CAM indicates where the model attended, not why it reached a clinical conclusion. Attention on a plausible region does not confirm a correct finding.
+## Explainability: Grad-CAM
 
-**Observations**
+Every prediction includes a Grad-CAM heatmap showing which image regions most influenced the model's decision.
 
-- For many correct predictions, attention falls on plausible lung regions. Examples include the lower-right lung field for pneumonia, the upper lobes for TB, and bilateral involvement for COVID-19.
+> Grad-CAM shows **where** the model attended, not **why** in a clinical sense. Attention on a plausible region does not prove a correct finding.
+
+### Observations
+
+- For many correct predictions, attention falls on plausible lung regions (for example the lower-right lung field for pneumonia, upper lobes for TB, bilateral involvement for COVID-19).
 - Normal-class images showed elevated central attention at layer4.
-- Re-analysis at layer3, which has finer resolution, reduced central attention from 68.8% to 37.2%. This suggests that part of the central bias was a resolution artefact, although some of it remains.
+- Re-analysis at layer3 (finer resolution) reduced central attention from 68.8% to 37.2%, suggesting part of the central bias was a resolution artefact, though some remains.
 
-**Planned improvement.** Restrict attention analysis to lung-field regions using lung segmentation masks, which should further reduce central-attention bias.
+**Planned improvement:** restrict attention analysis to lung-field regions (lung segmentation masks) to further reduce central-attention bias.
 
-# 12. Calibration and Confidence
+---
 
-Raw softmax scores from neural networks are often overconfident, which presents a risk in clinical settings.
+## Calibration and Confidence
 
-**Temperature scaling**
+Raw softmax scores from neural networks are often overconfident, which is a risk in clinical settings.
 
-- Temperature (T): 1.087, fitted on the validation set
-- Purpose: to align reported confidence more closely with the probability of a correct prediction
-- Effect: confidence is reduced for high-confidence predictions
+### Temperature scaling
 
-**Per-class decision thresholds**
+- **Temperature (T):** 1.276, fitted on the validation set
+- **Purpose:** rescale confidence to better match true correctness probability
+- **Effect:** confidence is reduced for high-confidence predictions. In a simple two-class approximation a raw 90% becomes roughly 85%; the exact change depends on the full set of class scores.
 
-- COVID-19 and TB: tuned to prioritise recall, so that true cases are not missed
-- Pneumonia: balanced precision and recall
-- Normal: conservative threshold, to reduce the risk of labelling sick patients as normal
+### Per-class decision thresholds
 
-**Uncertainty flagging**
+| Class | Threshold strategy |
+|-------|--------------------|
+| COVID-19, TB | Tuned to favour recall (catching true cases) |
+| Pneumonia | Balanced precision and recall |
+| Normal | Conservative, to avoid labelling sick patients as normal |
 
-- Threshold: 90% calibrated confidence
-- Predictions below this threshold are marked "Review recommended."
-- High confidence does not guarantee correctness. Every result requires clinician review.
+### Uncertainty flagging
 
-# 13. Model Development and Evaluation
+- **Threshold:** 90% calibrated confidence
+- Predictions below this are flagged **"Review recommended"**.
+- High confidence does not guarantee correctness; every result still needs clinician review.
 
-**Data split strategy**
+---
 
-- Stratified 70/15/15 split that preserves class proportions
-- No file-level overlap between the training, validation, and test sets. Near-duplicate leakage has not been ruled out (see Section 8).
-- Final evaluation performed on the test set only
+## Model Development and Evaluation
 
-**Metrics**
+### Data split strategy
 
-- Accuracy: overall percentage of correct predictions. Accuracy can be misleading on imbalanced data.
-- Precision and recall: per-class performance
-- Weighted F1: per-class F1 score averaged by class size
-- Macro F1: per-class F1 score averaged equally across classes, which makes it sensitive to failures on minority classes
-- ROC-AUC: the model's ability to rank true positives above negatives
-- Confusion matrix: a breakdown of all errors
+- Stratified 70/15/15 split preserving class proportions
+- No file-level overlap between train, validation and test sets (near-duplicate leakage is not ruled out; see [Dataset](#dataset))
+- Final evaluation on the test set only
 
-**Why both weighted and macro metrics are reported.** Pneumonia accounts for about 60% of the data and COVID-19 for about 8%. Accuracy and weighted F1 are dominated by the majority class. A model that predicted "Pneumonia" for every image would still achieve around 60% accuracy and could appear deceptively reasonable. Macro-averaged metrics and per-class precision and recall expose weak performance on minority classes, so all of these metrics should be read together.
+### Metrics
 
-# 14. Known Limitations and Future Work
+| Metric | What it tells you |
+|--------|-------------------|
+| Accuracy | Overall percent correct (can mislead on imbalanced data) |
+| Precision and recall | Per-class performance |
+| Weighted F1 | Per-class F1 averaged by class size |
+| Macro F1 | Per-class F1 averaged equally (sensitive to minority-class failure) |
+| ROC-AUC | Ability to rank true positives above negatives |
+| Confusion matrix | Breakdown of all errors |
 
-**Known limitations**
+**Why report both weighted and macro metrics?** Pneumonia makes up about 60% of the data and COVID-19 about 8%. Accuracy and weighted F1 are dominated by the majority class, so a model that predicted "Pneumonia" for everything would still score around 60% accuracy and look deceptively reasonable. Macro-averaged metrics and per-class precision/recall expose weak performance on minority classes, so read them all together.
 
-1. **Normal and Pneumonia confusion.** Normal images have 91% precision and 94% recall. The most common errors are Pneumonia misclassified as Normal (20 cases) and Normal misclassified as Pneumonia (13 cases). Grad-CAM shows elevated central-lung attention on Normal images.
-2. **Single public dataset.** The model was developed on one Kaggle dataset of 7,132 images before cleaning. It has not been validated across multiple hospitals or scanners and may not generalise to other equipment or patient populations.
-3. **Minority class size.** COVID-19 accounts for only about 8% of the data (545 images), with limited diversity.
-4. **Possible near-duplicate leakage** between data splits. Only exact duplicates were removed.
-5. **No clinical evaluation** against radiologist readers has been carried out.
+---
 
-**Future improvements**
+## Known Limitations and Future Work
 
-- Multi-site validation using South African hospital data
-- Near-duplicate detection using perceptual hashing, followed by re-evaluation
-- Targeted augmentation for Normal and Pneumonia classes
-- Lung-field attention masking
-- Prospective evaluation alongside clinician readers
-- Mobile and offline deployment for rural and mobile-clinic settings
-- Ensembles with other architectures
-- Active learning to prioritise high-uncertainty cases
+### Known limitations
 
-# 15. Security and Privacy
+1. **Normal vs Pneumonia confusion**
+   - Normal: 91% precision, 94% recall
+   - Most common errors: Pneumonia predicted as Normal (20 cases), Normal predicted as Pneumonia (13 cases)
+   - Grad-CAM shows elevated central-lung attention on Normal images
+2. **Single public dataset**
+   - One Kaggle dataset (7,132 images before cleaning)
+   - No multi-hospital or multi-scanner validation
+   - May not generalise to other equipment or patient populations
+3. **Minority class size**
+   - COVID-19 is only about 8% of the data (545 images) with limited diversity
+4. **Possible near-duplicate leakage** between splits (only exact duplicates were removed)
+5. **No clinical evaluation** against radiologist readers
 
-**Access control**
+### Future improvements
 
-- Staff login is required.
-- Role-based permissions apply:
-  - Clinical staff can upload and view cases and see analysis history.
-  - Technicians can manage user accounts and system settings.
-- An audit trail logs uploads, predictions, and reviews with timestamps.
-- Default and demonstration credentials must be changed or removed before deployment.
+- [ ] Multi-site validation with South African hospital data
+- [ ] Near-duplicate detection (perceptual hashing) and re-evaluation
+- [ ] Targeted augmentation for Normal vs Pneumonia
+- [ ] Lung-field attention masking
+- [ ] Prospective evaluation alongside clinician readers
+- [ ] Mobile and offline deployment for rural and mobile-clinic settings
+- [ ] Ensembles with other architectures
+- [ ] Active learning to prioritise high-uncertainty cases
 
-**Data handling**
+
+
+## Security and Privacy
+
+### Access control
+
+- Staff login required
+- Role-based permissions:
+
+| Role | Permissions |
+|------|-------------|
+| Clinical staff | View and upload cases, see analysis history |
+| Technician | Manage user accounts and system settings |
+
+- Audit trail: uploads, predictions and reviews are logged with timestamps
+- Remove or change any default/demo credentials before deployment
+
+### Data handling
 
 - Cases and predictions are stored in a local SQLite database.
-- API keys are read from environment variables and are never hard-coded.
-- Image retention period: **[to be confirmed]**
+- API keys are read from environment variables and never hard-coded.
 
-**Compliance considerations**
 
-- Comply with the data protection laws that apply in your jurisdiction, such as POPIA (South Africa), GDPR, or HIPAA.
-- Configure access controls, audit trails, and retention policies to meet your institution's requirements.
-- Do not upload identifiable patient data to this prototype without ethics approval and appropriate agreements.
+### Compliance considerations
 
-# 15A. Training Notebooks
+- Follow the data protection laws that apply to you, such as POPIA (South Africa), GDPR or HIPAA.
+- Configure access controls, audit trails and retention policies to meet your institution's requirements.
+- Do not upload identifiable patient data to a prototype system without ethics approval and appropriate agreements.
 
-The Kaggle training notebooks used to train and evaluate the ResNet-50 model are provided at the following location: `notebooks/Chest-x-ray-clinical-assistant.ipynb`.
+---
 
-# 16. Project Structure
+## Project Structure
 
-```
-X-RAY-IMAGE-SCANNER2/
-├── README.md
-├── .gitattributes                  # Git LFS configuration for the model
-├── .gitignore
-├── deployment_config.json          # Class labels and preprocessing settings
+```text
+<repository-folder>/
+├── auth_server.py            # Main Flask application
 ├── models/
-│   └── resnet50_final.pth          # Trained ResNet-50 weights (Git LFS)
-└── clinical-support-system/
-    ├── auth_server.py              # Main Flask application and routes
-    ├── predict.py                  # Image preprocessing and model inference
-    ├── gradcam.py                  # Grad-CAM explainability
-    ├── database.py                 # SQLite case management and staff accounts
-    ├── ai_interpreter.py           # Groq API integration for plain-language explanations
-    ├── requirements.txt            # Python dependencies
-    ├── static/
-    │   ├── css/navigation.css      # Styling
-    │   └── images/                 # Logos and banner images
-    └── templates/
-        ├── _navigation.html        # Shared navigation bar
-        ├── index.html              # Staff login page
-        ├── clinical_dashboard.html # Dashboard and new scan
-        ├── case_details.html       # Case history and results
-        └── technician_dashboard.html # Staff management dashboard
+│   └── resnet50_xray.pth     # Trained model weights (Git LFS)
+├── data/
+│   ├── train/                # Training images (stratified split)
+│   ├── val/                  # Validation images
+│   └── test/                 # Test images
+├── src/
+│   ├── preprocessing.py      # Image loading, resizing, normalisation
+│   ├── model.py              # ResNet-50 architecture and inference
+│   ├── gradcam.py            # Grad-CAM explainability
+│   ├── database.py           # SQLite case management
+│   ├── calibration.py        # Temperature scaling and confidence thresholds
+│   └── groq_integration.py   # Groq/Qwen LLM integration
+├── templates/
+│   ├── login.html            # Staff login page
+│   ├── upload.html           # Image upload and analysis
+│   ├── history.html          # Case history view
+│   ├── reports.html          # Statistics and flagged cases
+│   └── technician.html       # Staff management dashboard
+├── static/
+│   ├── css/                  # Styling
+│   └── js/                   # Client-side interactivity
+├── requirements.txt          # Python dependencies
+├── README.md                 # This file
+├── LICENSE                   # Apache 2.0 license text
+└── .gitattributes            # Git LFS configuration for the model
 ```
 
-# 17. Technologies and Stack
+> **T
 
-**Machine learning**
+## Technologies and Stack
 
-- PyTorch and torchvision
-- ResNet-50, pretrained on ImageNet and fine-tuned for four classes
-- Training carried out on Kaggle GPU notebooks
-- NumPy, Pandas, and scikit-learn (metrics)
+| Area | Tools |
+|------|-------|
+| Core ML | PyTorch, torchvision, ResNet-50 (ImageNet pretrained, fine-tuned for 4 classes), NumPy, Pandas, scikit-learn; trained on Kaggle GPU notebooks |
+| Data and explainability | Pillow, OpenCV, Laplacian variance (sharpness), MD5 hashing (exact duplicates), Matplotlib, Seaborn, Grad-CAM (layer3 and layer4 analysis) |
+| Deployment | Flask, SQLite (case management and audit trail), Flask-Login (authentication and role-based access), Groq API with Qwen model (AI explanations), PyTorch on CPU/GPU |
+| DevOps | Git, Git LFS, pip and virtual environments, environment variables for secrets |
 
-**Data processing and explainability**
+---
 
-- Pillow and OpenCV
-- Laplacian variance (sharpness) and MD5 hashing (exact duplicate detection)
-- Matplotlib and Seaborn
-- Grad-CAM, with layer3 and layer4 analysis
-
-**Deployment**
-
-- Flask
-- SQLite (case management and audit trail)
-- Flask-Login (authentication and role-based access)
-- Groq API and Qwen model (AI-generated explanations)
-- PyTorch on CPU or GPU
-
-**Development operations**
-
-- Git and Git LFS
-- pip and virtual environments
-- Environment variables for secrets (`.env` supported)
-
-# 18. Contributing
+## Contributing
 
 Contributions are welcome. Please follow the guidelines below.
 
-**Reporting bugs**
+### Reporting bugs
 
-- Check existing issues before opening a new one.
-- Provide a clear title, a description, and steps to reproduce the problem.
-- Include the Python version, operating system, and any error messages.
+- Check existing issues first.
+- Provide a clear title, description and steps to reproduce.
+- Include Python version, OS and error messages.
 
-**Suggesting features**
+### Suggesting features
 
 - Open an issue tagged `enhancement`.
-- Describe the use case and the expected behaviour.
-- Link relevant research or clinical guidelines where applicable.
+- Describe the use case and expected behaviour.
+- Link relevant research or clinical guidelines if applicable.
 
-**Submitting code**
+### Submitting code
 
 1. Fork the repository.
 2. Create a branch: `git checkout -b feature/your-feature-name`
-3. Make your changes and test them.
+3. Make and test your changes.
 4. Commit with a clear message: `git commit -m "Add feature: description"`
-5. Push the branch: `git push origin feature/your-feature-name`
-6. Open a pull request with a summary of the changes.
+5. Push: `git push origin feature/your-feature-name`
+6. Open a Pull Request with a summary of changes.
 
-**Development setup**
+### Code standards
+
+- Follow PEP 8.
+- Add docstrings to functions and classes.
+- Write unit tests for new features.
+- Update documentation for user-facing changes.
+
+### Development setup
 
 ```bash
 git clone <your-fork-url>
-cd X-RAY-IMAGE-SCANNER2
+cd <repository-folder>
 python3 -m venv .venv
 source .venv/bin/activate
-git lfs pull
-pip install -r clinical-support-system/requirements.txt
+pip install -r requirements.txt
+pip install -r requirements-dev.txt   # testing and linting tools
+pytest                                # run tests
 ```
 
-# 19. Support and Contact
+See `CONTRIBUTING.md` for detailed guidelines.
 
-| Channel | Purpose |
-|:---|:---|
-| GitHub Issues | Bug reports and feature requests |
-| GitHub Discussions | General questions and ideas |
-| Email: avelohlachwayo0828@gmail.com | Deployment questions and partnership enquiries |
-| Documentation | Setup, usage, and troubleshooting (self-service) |
+---
 
-When reporting a bug, please include a short title, steps to reproduce, expected and actual behaviour, the environment (Python version, operating system, and `pip freeze` output), and the full traceback, if one exists.
+## Support and Contact
 
-# 20. Citation
+| Channel | Use for |
+|---------|---------|
+| GitHub Issues | Bug reports, feature requests |
+| GitHub Discussions | General questions, ideas |
+| Email | Deployment questions, partnerships: `[avellohlachwayo0828@gmail.com]` |
+| Documentation | Setup, usage, troubleshooting (self-service) |
 
-If you use this project in research or publications, please cite it as follows:
+**Before reaching out:** check [Troubleshooting](#troubleshooting), search existing issues, and review the [FAQ](#faq).
+
+**When reporting a bug, include:**
+
+- A short title
+- Steps to reproduce
+- Expected vs actual behaviour
+- Environment (Python version, OS, `pip freeze`)
+- The full traceback, if any
+
+---
+
+## Citation
+
+If you use this project in research or publications, please cite:
 
 ```bibtex
 @software{xray_scanner_2026,
@@ -487,38 +703,44 @@ If you use this project in research or publications, please cite it as follows:
 }
 ```
 
-# 21. Licence
+---
 
-The project code is released under the Apache License 2.0. See `LICENSE` for the full terms.
+## License
 
-The Chest X-Ray dataset by Pritpal Singh is listed under Apache 2.0 on Kaggle. Check the dataset page and its original image sources for the terms that apply to your use.
+This project's code is released under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full terms.
 
-# 22. References and Resources
+**Dataset:** the Chest X-Ray dataset by Pritpal Singh is listed under Apache 2.0 on Kaggle. Check the dataset page and its original image sources for the terms that apply to your use.
 
-**Chest X-ray classification literature**
+---
 
-- Rajpurkar et al., "CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays with Deep Learning" (2017)
-- Wang et al., "ChestX-ray8: Hospital-scale Chest X-ray Database and Benchmarks on Weakly-Supervised Classification and Localization of Common Thorax Diseases" (CVPR 2017)
-- Wang, Lin, and Wong, "COVID-Net: A Tailored Deep Convolutional Neural Network Design for Detection of COVID-19 Cases from Chest X-Ray Images" (Scientific Reports, 2020)
+## References and Resources
 
-**Dataset**
+### Chest X-ray classification literature
 
-- Pritpal Singh, Chest X-Ray (COVID-19, Pneumonia, Normal, Tuberculosis), Kaggle: https://www.kaggle.com/datasets/pritpal2873/chest-x-ray-dataset-4-categories
+- **CheXNet:** Rajpurkar et al., "CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays with Deep Learning" (2017)
+- **ChestX-ray8:** Wang et al., "ChestX-ray8: Hospital-scale Chest X-ray Database and Benchmarks on Weakly-Supervised Classification and Localization of Common Thorax Diseases" (CVPR 2017)
+- **COVID-Net:** Wang, Lin and Wong, "COVID-Net: A Tailored Deep Convolutional Neural Network Design for Detection of COVID-19 Cases from Chest X-Ray Images" (Scientific Reports, 2020)
 
-**South African health context**
+### Dataset
 
-- WHO Global Tuberculosis Report: https://www.who.int/publications/global_reports/
-- South African Thoracic Society guidelines on community-acquired pneumonia: https://pmc.ncbi.nlm.nih.gov/articles/PMC7433705/
-- Radiologist shortage: **[add the exact RSSA / World Health Expo source (2024)]**
+- Pritpal Singh, Chest X-Ray (COVID-19, Pneumonia, Normal, Tuberculosis), Kaggle: <https://www.kaggle.com/datasets/pritpal2873/chest-x-ray-dataset-4-categories>
 
-**Technical documentation**
+### South African health context
+
+- WHO Global Tuberculosis Report: <https://www.who.int/publications/global_reports/>
+- South African Thoracic Society community-acquired pneumonia guidelines: <https://pmc.ncbi.nlm.nih.gov/articles/PMC7433705/>
+- Radiologist shortage: 
+
+### Technical documentation
 
 - He et al., "Deep Residual Learning for Image Recognition" (2015)
-- Selvaraju et al., "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" (2016; ICCV 2017)
-- PyTorch documentation: https://pytorch.org/docs/stable/index.html
-- Flask documentation: https://flask.palletsprojects.com/
+- Selvaraju et al., "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization" (2016 / ICCV 2017)
+- PyTorch: <https://pytorch.org/docs/stable/index.html>
+- Flask: <https://flask.palletsprojects.com/>
 
-# 23. Team
+---
+
+## Team
 
 **CSIT Final-Year Project 2026, Red Team**
 
@@ -527,31 +749,42 @@ The Chest X-Ray dataset by Pritpal Singh is listed under Apache 2.0 on Kaggle. C
 - Avelo Hlachwayo
 - Mihloti Mahlaule
 
-# 24. Acknowledgments
+---
+
+## Acknowledgments
 
 - **Dataset:** Pritpal Singh (Kaggle)
 - **Frameworks:** PyTorch, Flask, scikit-learn
-- **Research:** CheXNet, COVID-Net, and the wider chest X-ray classification literature
-- **Clinical context:** WHO Global TB Report and the South African Thoracic Society
-
-# 25. Frequently Asked Questions
-
-**Is this a diagnostic tool or a clinical support tool?** Neither has been validated. The system is a research prototype intended to explore clinical *support*. It flags likely findings and highlights supporting evidence, but a qualified radiologist or physician must make every diagnosis. AI predictions should never be relied on alone.
-
-**What should I do if the system shows "Review recommended"?** Calibrated confidence is below 90%, and a clinician should review the case. Predictions above 90% also require clinician review.
-
-**Can I run this on my hospital's equipment?** The model is lightweight, at about 90 MB, and runs on CPU or GPU. Using it with real patients would require ethics approval, clinical validation, and regulatory compliance. PACS integration is not included.
-
-**Can I retrain the model on my own data?** In principle, yes. You would need labelled X-ray images, ideally more than 1,000 per class, and preferably a GPU. The training notebooks are listed in Section 15A.
-
-**How is patient data privacy handled?** See Section 15. Before using any real patient data, review exactly what is stored locally and what is sent to the Groq API.
-
-**Does it work on mobile devices or tablets?** The web application is designed to be responsive and usable on tablets. Offline and mobile applications are planned as future work.
-
-**How do I contribute or report a bug?** See Section 18 and Section 19.
+- **Research:** CheXNet, COVID-Net and the wider chest X-ray classification literature
+- **Clinical context:** WHO Global TB Report, South African Thoracic Society
 
 ---
 
-**Last updated:** October 2026  
-**Maintainers:** Red Team (Nsovo Sono, Ganda Marindi, Avelo Hlachwayo, Mihloti Mahlaule)  
-**Status:** Research prototype. Not clinically validated.
+## FAQ
+
+**Is this a diagnostic tool or a clinical support tool?**
+Neither is validated. It is a research prototype intended to explore clinical support. It flags likely findings and highlights evidence, but a qualified radiologist or physician must make every diagnosis. Never rely solely on AI predictions.
+
+**What if the system says "Review recommended"?**
+Calibrated confidence is below 90%, so a clinician should review the case. Predictions above 90% also need clinician review.
+
+**Can I run this on my hospital's equipment?**
+The model is lightweight (about 90 MB) and runs on CPU or GPU. Using it with real patients would require ethics approval, clinical validation and regulatory compliance. PACS integration is not included.
+
+**Can I retrain the model on my own data?**
+In principle, yes. You would need labelled X-rays (ideally well over 1,000 per class) and preferably a GPU. See the training notebook/script once it is added to the repository.
+
+**What about patient data privacy?**
+See [Security and Privacy](#security-and-privacy). Review exactly what is stored locally and what is sent to the Groq API before using any real patient data.
+
+**Does it work on mobile or tablets?**
+The web app is intended to be responsive and usable on tablets. Offline and mobile apps are future work.
+
+**How do I contribute or report bugs?**
+See [Contributing](#contributing) and [Support and Contact](#support-and-contact).
+
+---
+
+*Last updated: October 2026*
+*Maintainers: Red Team (Nsovo Sono, Ganda Marindi, Avelo Hlachwayo, Mihloti Mahlaule)*
+*Status: Research prototype; not clinically validated*
